@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2022 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -28,6 +28,7 @@ $stamm 		= clm_core::$load->request_int('stamm');
 $ersatz		= clm_core::$load->request_int('ersatz');
 $cid 		= clm_core::$load->request_array_string('cid');
 $attr 		= clm_core::$load->request_array_string('attr');
+$check		= clm_core::$load->request_array_string('check');
 $man_name 	= clm_core::$load->request_string('man_name');
 $liga_lokal	= clm_core::$load->request_string('lokal');
 $liga_mf 	= clm_core::$load->request_string('mf');
@@ -149,6 +150,12 @@ $lists['mf']	= JHTML::_('select.genericlist',   $mflist, 'mf', 'class="inputbox"
           tmp1 = nameA.innerHTML;
           nameA.innerHTML = nameB.innerHTML;
           nameB.innerHTML = tmp1;
+          // (hidden) Name tauschen
+          var hiddennameA = document.getElementById ( "hidden_name" + idA );
+          var hiddennameB = document.getElementById ( "hidden_name" + idB );
+          tmp11 = hiddennameA.innerHTML;
+          hiddennameA.innerHTML = hiddennameB.innerHTML;
+          hiddennameB.innerHTML = tmp11;
 
           // DWZ tauschen
           var dwzA = document.getElementById ( "dwz" + idA );
@@ -220,6 +227,18 @@ $lists['mf']	= JHTML::_('select.genericlist',   $mflist, 'mf', 'class="inputbox"
           tmp91 = hiddenattrA.value;
           hiddenattrA.value = hiddenattrB.value;
           hiddenattrB.value = tmp91;
+          // (hidden) gesperrt tauschen
+          var hiddengesperrtA = document.getElementById ( "hidden_gesperrt" + idA );
+          var hiddengesperrtB = document.getElementById ( "hidden_gesperrt" + idB );
+          tmp92 = hiddengesperrtA.value;
+          hiddengesperrtA.value = hiddengesperrtB.value;
+          hiddengesperrtB.value = tmp92;
+          // (hidden) check tauschen
+          var hiddencheckA = document.getElementById ( "hidden_check" + idA );
+          var hiddencheckB = document.getElementById ( "hidden_check" + idB );
+          tmp92 = hiddencheckA.value;
+          hiddencheckA.value = hiddencheckB.value;
+          hiddencheckB.value = tmp92;
 
         }
 
@@ -244,8 +263,12 @@ $lists['mf']	= JHTML::_('select.genericlist',   $mflist, 'mf', 'class="inputbox"
         }
 --></script>
 
-<form action="index.php?option=com_clm&amp;view=meldeliste&amp;layout=sent&amp;saison=<?php echo $sid ?>&amp;lid=<?php echo $lid ?>&amp;zps=<?php echo $zps ?>&amp;man=<?php echo $man ?>" method="post" name="adminForm">
 <center>
+
+<!--<form action="index.php?option=com_clm&amp;view=meldeliste&amp;layout=sent&amp;saison=<?php echo $sid ?>&amp;lid=<?php echo $lid ?>&amp;zps=<?php echo $zps ?>&amp;man=<?php echo $man ?>" method="post" name="adminForm">
+-->
+<form action="<?php echo JRoute::_('index.php'); ?>" method="post" name="adminForm" id="adminForm">
+
 <table class="adminlist" cellpadding="0" cellspacing="0">
 	<tr> 
 		<th class="anfang" width="4%"><?php echo JText::_('CLUB_LIST_NR') ?></th>
@@ -268,7 +291,12 @@ $lists['mf']	= JHTML::_('select.genericlist',   $mflist, 'mf', 'class="inputbox"
 	?>
 	<tr>
 		<td><?php echo $i+1; ?></td>
-		<td><span id="name<?php echo $i+1; ?>"><?php echo $sort[$i]->name; ?></span>
+		<td><span id="name<?php echo $i+1; ?>"><?php if (!isset($check[$sort[$i]->id]) OR $check[$sort[$i]->id] != '1') echo $sort[$i]->name;
+														else echo '<del>'.$sort[$i]->name.'</del>'; ?></span>
+			<input type="hidden" name="hidden_name<?php echo $i+1; ?>" id="hidden_name<?php echo $i+1; ?>" value="<?php echo $sort[$i]->name; ?>" />
+			<input type="hidden" name="hidden_gesperrt<?php echo $i+1; ?>" id="hidden_gesperrt<?php echo $i+1; ?>" value="<?php echo $sort[$i]->gesperrt; ?>" />
+			<input type="hidden" name="hidden_check<?php echo $i+1; ?>" id="hidden_check<?php echo $i+1; ?>" 
+					value="<?php if (!isset($check[$sort[$i]->id])) echo '0'; else echo $check[$sort[$i]->id]; ?>" />
 			<input type="hidden" name="hidden_zps<?php echo $i+1; ?>" id="hidden_zps<?php echo $i+1; ?>" value="<?php echo $sort[$i]->zps; ?>" /></td>
 		<td id="attr<?php echo $i+1; ?>" name="attr<?php echo $i+1; ?>"><?php echo $attr[$sort[$i]->id]; ?>
 			<input type="hidden" name="hidden_attr<?php echo $i+1; ?>" id="hidden_attr<?php echo $i+1; ?>" value="<?php echo $attr[$sort[$i]->id];; ?>" /></td>
@@ -323,6 +351,9 @@ $lists['mf']	= JHTML::_('select.genericlist',   $mflist, 'mf', 'class="inputbox"
 		</table>
 <br />
 	<input type="submit" value=" <?php echo JText::_('CLUB_LIST_SEND') ?> ">
+		<input type="hidden" name="view" value="meldeliste" />
+		<input type="hidden" name="option" value="com_clm" />
+		<input type="hidden" name="layout" value="sent" />
 		<input type="hidden" name="saison" value="<?php echo $sid; ?>" />
 		<input type="hidden" name="lid" value="<?php echo $lid; ?>" />
 		<input type="hidden" name="man" value="<?php echo $man; ?>" />

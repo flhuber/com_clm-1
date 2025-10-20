@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2024 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
 */
@@ -50,9 +50,12 @@ $rights["db_config_get"]=array(0,"BE_config_general",true);
 $rights["db_config_save"]=array(0,"BE_config_general",true);
 $rights["db_config_reset"]=array(0,"BE_config_general",true);
 $rights["db_report"]=array();
+$rights["db_report_sl"]=array();
 $rights["db_report_save"]=array();
+$rights["db_report_save_sl"]=array();
 $rights["db_report_overview"]=array();
 $rights["view_report"]=array();
+$rights["view_report_sl"]=array();
 $rights["db_schedule"]=array();
 $rights["view_schedule"]=array();
 $rights["view_schedule_pdf"]=array();
@@ -79,12 +82,14 @@ $rights["db_xml_data"]=array();
 $rights["db_xml_round"]=array();
 $rights["db_nwz_average"]=array();
 $rights["db_tournament_ranking_round"]=array(); // Rangliste aktualisieren für Rundenbericht
-$rights["db_mail"]=array(0,"BE_user_general",true);
-$rights["db_mail_save"]=array(0,"BE_user_general",true);
-$rights["view_mail"]=array(0,"BE_user_general",true);
+$rights["db_mail"]=array();
+$rights["db_mail_save"]=array();
+$rights["view_mail"]=array();
+$rights["view_mail_confirm"]=array(0,"BE_user_general",true);
 $rights["db_player_check"]=array(); // Prüfung, ob spieler im Spielbetrieb verankert
 $rights["mail_send"]=array(); // Mailversand
-
+$rights["db_syn_player_block"]=array(); // Synchronisation Sperrkennzeichen
+$rights["db_checkin"]=array(); // Checkin auf NULL-Werte
 $rights["test_print"]=array();
 //************************
 // Turniere
@@ -96,6 +101,8 @@ $rights["db_tournament_group"]=array(4, array("BE_league_general" => true, "BE_t
 
 $rights["db_tournament_genDWZ"]=array(1,"BE_tournament_edit_round","BE_league_edit_round","BE_teamtournament_edit_round",1,0); // inoff. DWZ generieren
 $rights["db_tournament_delDWZ"]=array(1,"BE_tournament_edit_round","BE_league_edit_round","BE_teamtournament_edit_round",1,0); // inoff. DWZ löschen
+$rights["db_tournament_genFIDERating"]=array(1,"BE_tournament_edit_round","BE_league_edit_round","BE_teamtournament_edit_round",1,0); // inoff. DWZ generieren
+$rights["db_tournament_delFIDERating"]=array(1,"BE_tournament_edit_round","BE_league_edit_round","BE_teamtournament_edit_round",1,0); // inoff. DWZ löschen
 $rights["db_tournament_updateDWZ"]=array(1,"BE_tournament_edit_detail","BE_league_edit_detail","BE_teamtournament_edit_detail",1,0); // DWZ des Turniers aktualisieren
 $rights["db_tournament_copy"]=array(5,"BE_tournament_create","BE_league_create","BE_teamtournament_create",1,0); // Kopieren
 $rights["db_tournament_genRounds"]=array(1,"BE_tournament_edit_round","BE_league_edit_round","BE_teamtournament_edit_round",1,0); // Runden generieren
@@ -114,6 +121,7 @@ $rights["db_pgn_export"]=array(); // pgn-Datei erstellen
 $rights["db_pgn_template"]=array(); // pgn-Template erstellen
 $rights["db_swm_import"]=array(); // Swiss-Manager-Datei importieren
 $rights["db_trf_import"]=array(); // Turnierdatei im TRF-Format importieren
+$rights["db_trf_export"]=array(); // Turnierdatei im TRF-Format exportieren
 $rights["db_arena_import"]=array(); // Turnier aus lechess importieren
 $rights["db_dewis_user"]=array(); // Online Club Check für User
 $rights["db_check_season_user"]=array(); // Online Season Check für Ligen und Turniere

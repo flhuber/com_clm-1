@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2024 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link https://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -83,6 +83,11 @@ if(isset($liga[0])){
 	$detail		= clm_core::$load->request_int('detail',0);
 	if ($detail == 0) $detailp = '1'; else $detailp = '0';
 
+	$offen		= $this->offen;
+	$anz_offen	= count($offen);
+	if ($anz_offen > 0) {
+		clm_core::$load->load_js("view_reset");
+	}
 	// Userkennung holen
 	$user	=JFactory::getUser();
 	$jid	= $user->get('id');
@@ -348,7 +353,9 @@ if (isset($paar[$y]->htln)) {  // Leere Begegnungen ausblenden
         // Ergebnis Mannschaft
         $paar_exist = 0;
 		$remis_com = 0;
-        if ($summe[$z2]->sum !="" AND $summe[$z2]->paarung == ($y+1)) {
+//        if ($summe[$z2]->sum !="" AND $summe[$z2]->paarung == ($y+1)) {
+        if ($summe[$z2]->paarung < $paar[$y]->paar) $z2 = $z2 +2;
+		if ($summe[$z2]->sum !="" AND $summe[$z2]->paarung == $paar[$y]->paar) {
             $paar_exist = 1;
             echo $summe[$z2]->sum.' : '.$summe[$z2+1]->sum;
 			if (($runden_modus == 4 OR $runden_modus == 5) AND ($summe[$z2]->sum == $summe[$z2+1]->sum)) $remis_com = 1; else $remis_com = 0;
@@ -374,7 +381,8 @@ if (isset($paar[$y]->htln)) {  // Leere Begegnungen ausblenden
     </tr>
 <?php
 }
-if (isset($einzel[$w]->paar) AND $einzel[$w]->paar == ($y+1)) {
+//if (isset($einzel[$w]->paar) AND $einzel[$w]->paar == ($y+1)) {
+if (isset($einzel[$w]->paar) AND $einzel[$w]->paar == $paar[$y]->paar) {
 // Bretter
 for ($x=0; $x<$liga[0]->stamm; $x++) {
 
@@ -561,7 +569,8 @@ if ($x%2 != 0) { $zeilenr	= "zeile2";
 	if($x >= $liga[0]->auf AND $x < ($liga[0]->auf + $liga[0]->auf_evtl)) { echo "_auf_evtl"; }
 	if($x >= ($liga[0]->teil-$liga[0]->ab)) { echo "_ab"; }
 	if($x >= ($liga[0]->teil-($liga[0]->ab_evtl + $liga[0]->ab)) AND $x < ($liga[0]->teil-$liga[0]->ab) ) { echo "_ab_evtl"; }
-	?>"><?php echo $x+1; ?></td>
+	?>"><?php // echo $x+1; 
+		echo $punkte[$x]->rankingpos; ?></td>
 	<td class="team">
 	<?php if ($punkte[$x]->published ==1 AND $params['noBoardResults'] == '0') { ?>
 	<div><a href="index.php?option=com_clm&view=mannschaft&saison=<?php echo $sid; ?>&liga=<?php echo $lid; ?>&tlnr=<?php echo $punkte[$x]->tln_nr; ?>&amp;Itemid=<?php echo $item; ?>"><?php echo $punkte[$x]->name; ?></a></div>

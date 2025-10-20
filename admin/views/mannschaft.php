@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2022 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -21,6 +21,7 @@ public static function setMannschaftenToolbar()
 	if($clmAccess->access('BE_team_registration_list') !== false) {
 		JToolBarHelper::custom('delete_meldeliste','send.png','send_f2.png', JText::_( 'MANNSCHAFT_BUTTON_ML_DEL'));
 		JToolBarHelper::custom('meldeliste','send.png','send_f2.png', JText::_( 'MANNSCHAFT_BUTTON_ML_UPD'));
+		JToolBarHelper::custom('copy_meldeliste','copy.png','copy_f2.png', JText::_( 'Meldeliste kopieren von'));
 		JToolBarHelper::custom('spielfrei','cancel.png','cancel_f2.png', JText::_( 'MANNSCHAFT_BUTTON_SPIELFREI'));
 		JToolBarHelper::custom('annull','cancel.png','cancel_f2.png', JText::_( 'MANNSCHAFT_BUTTON_ANNULL'));
 		JToolBarHelper::publishList();
@@ -424,6 +425,7 @@ public static function mannschaft( &$row,$lists, $option )
 		<input type="hidden" name="section" value="mannschaften" />
 		<input type="hidden" name="option" value="com_clm" />
 		<input type="hidden" name="id" value="<?php echo $row->id; ?>" />
+		<input type="hidden" name="rankingpos" value="<?php echo $row->rankingpos; ?>" />
 		<input type="hidden" name="pre_man" value="<?php echo $row->man_nr; ?>" />
 <!---		<input type="hidden" name="cid" value="<?php //echo $row->cid; ?>" />
 		<input type="hidden" name="client_id" value="<?php //echo $row->cid; ?>" />

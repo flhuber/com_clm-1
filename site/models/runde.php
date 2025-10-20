@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2024 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -161,7 +161,7 @@ class CLMModelRunde extends JModelLegacy
 	    ." a.pgnnr, pg.text,"
 		." m.name, n.name as mgname, m.sname, n.sname as smgname, d.Spielername as hname, d.DWZ as hdwz, d.FIDE_Elo as helo, d.Status as hstatus,"
 		." p.erg_text as erg_text, e.Spielername as gname, e.DWZ as gdwz, e.FIDE_Elo as gelo, e.Status as gstatus, q.erg_text as dwz_text,"
-		." k.snr as hsnr, l.snr as gsnr, k.start_dwz as hstart_dwz, l.start_dwz as gstart_dwz,"
+		." k.snr as hsnr, l.snr as gsnr, k.start_dwz as hstart_dwz, l.start_dwz as gstart_dwz, k.attr as hattr, l.attr as gattr,"
 		." t.man_nr as tmnr, t.Rang as trang, s.man_nr as smnr, s.Rang as srang"
 		." FROM #__clm_rnd_spl as a "
 		." LEFT JOIN #__clm_rnd_man as r ON ( r.lid = a.lid AND r.runde = a.runde AND r.tln_nr = a.tln_nr AND  r.dg = a.dg) "
@@ -299,25 +299,26 @@ class CLMModelRunde extends JModelLegacy
 			;
 		$db->setQuery($query);
 		$order = $db->loadObjectList();
- 		if (isset($order[0]) AND  $order[0]->order == 1) {
+		if (isset($order[0]) AND  $order[0]->order == 1) {
 			$ordering = " , m.ordering ASC"; }
 		else { $ordering =' '; }
+		if (isset($order[0])) $rc = clm_core::$api->db_tournament_ranking_round($liga,true,$runde,$dg);
 		if (isset($order[0]) AND $order[0]->liga_mt == 0) { // Liga
 			$query = " SELECT a.tln_nr as tln_nr,m.name as name, (SUM(a.manpunkte) - m.abzug) as mp, m.abzug as abzug, "
 			." (SUM(a.brettpunkte) - m.bpabzug) as bp, m.bpabzug, SUM(a.wertpunkte) as wp, m.published, m.man_nr, "  
 			." COUNT(DISTINCT case when a.gemeldet > 1 then CONCAT(a.dg,' ',a.runde) else null end) as spiele, "  
-			." m.sumtiebr1, m.sumtiebr2, m.sumtiebr3 "
+			." m.sumtiebr1, m.sumtiebr2, m.sumtiebr3, z_rankingpos as rankingpos"
 			." FROM #__clm_rnd_man as a "
 			." LEFT JOIN #__clm_mannschaften as m ON m.liga = $liga AND m.tln_nr = a.tln_nr "
 			." WHERE a.lid = ".$liga
 			." AND m.man_nr <> 0 ";
 		} else { // Mannschaftsturnier
 			$rc = 999;
-			if (isset($order[0])) $rc = clm_core::$api->db_tournament_ranking_round($liga,true,$runde,$dg);
+//			if (isset($order[0])) $rc = clm_core::$api->db_tournament_ranking_round($liga,true,$runde,$dg);
 			$query = " SELECT a.tln_nr as tln_nr,m.name as name, (SUM(a.manpunkte) - m.abzug) as mp, m.abzug as abzug, "
 			." (SUM(a.brettpunkte) - m.bpabzug) as bp, m.bpabzug, SUM(a.wertpunkte) as wp, m.published, m.man_nr, "  
 			." COUNT(DISTINCT case when a.gemeldet > 1 then CONCAT(a.dg,' ',a.runde) else null end) as spiele, "  
-			." m.z_sumtiebr1 as sumtiebr1, m.z_sumtiebr2  as sumtiebr2, m.z_sumtiebr3 as sumtiebr3 "
+			." m.z_sumtiebr1 as sumtiebr1, m.z_sumtiebr2  as sumtiebr2, m.z_sumtiebr3 as sumtiebr3, m.z_rankingpos as rankingpos "
 			." FROM #__clm_rnd_man as a "
 			." LEFT JOIN #__clm_mannschaften as m ON m.liga = $liga AND m.tln_nr = a.tln_nr "
 			." WHERE a.lid = ".$liga
@@ -534,6 +535,32 @@ class CLMModelRunde extends JModelLegacy
 	return $team;
 	}
 
+	// offene Partien (Ergebnis --- 7)	
+	function _getCLMOffen ( &$options )
+	{
+		$liga	= clm_core::$load->request_int('liga',0);
+		$dg 	= clm_core::$load->request_int('dg');
+		$runde = clm_core::$load->request_int('runde');
+	
+		$db		= JFactory::getDBO();
+		$query = " SELECT a.tln_nr,a.dg,a.runde,a.paar,a.ergebnis "
+				." FROM #__clm_rnd_spl as a "
+				." WHERE a.lid = ".$liga
+				." AND a.dg = ".$dg
+				." AND a.runde = ".$runde
+				." AND a.ergebnis = 7 "
+				." ORDER BY a.tln_nr,a.dg ASC,a.runde ASC,a.paar "
+			;
+
+		return $query;
+	}
+
+	function getCLMOffen ( $options=array() )
+	{
+		$query	= $this->_getCLMOffen( $options );
+		$result = $this->_getList( $query );
+		return $result;
+	}
 
 }
 ?>

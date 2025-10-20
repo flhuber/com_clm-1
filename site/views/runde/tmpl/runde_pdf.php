@@ -239,11 +239,14 @@ for ($y=0; $y< ($liga[0]->teil)/2; $y++){
 	if ($paar[$y]->hname == 'spielfrei'||$paar[$y]->gname == 'spielfrei') {
 		$z2+=2;
 	} else {
+        if ($summe[$z2]->paarung < $paar[$y]->paar) $z2 = $z2 +2;
 		$hsum = $summe[$z2]->sum;
 		$gsum = $summe[$z2+1]->sum;
-	while (isset($einzel[$w]->paar) AND $einzel[$w]->paar < ($y+1)) {
+//	while (isset($einzel[$w]->paar) AND $einzel[$w]->paar < ($y+1)) {
+	while (isset($einzel[$w]->paar) AND $einzel[$w]->paar < $paar[$y]->paar) {
 		$w++; } //mtmt
-	if (isset($einzel[$w]->paar) AND $einzel[$w]->paar == ($y+1)) {
+//	if (isset($einzel[$w]->paar) AND $einzel[$w]->paar == ($y+1)) {
+	if (isset($einzel[$w]->paar) AND $einzel[$w]->paar == $paar[$y]->paar) {
 // Bretter
 		for ($x=0; $x<$liga[0]->stamm; $x++) {
 			if ($x%2 != 0) { $zeilenr = 'zeile1'; }
@@ -427,7 +430,8 @@ $diff = $spielfrei[0]->count;
 	// Anzahl der Teilnehmer durchlaufen
 for ($x=0; $x< ($liga[0]->teil)-$diff; $x++){
 	if (!$cr) $pdf->SetX($xx1); else $pdf->SetX($xx2);
-	$pdf->Cell(5,$zelle,$x+1,'L',0,'C');
+//	$pdf->Cell(5,$zelle,$x+1,'L',0,'C');
+	$pdf->Cell(5,$zelle,$punkte[$x]->rankingpos,'L',0,'C');
 	$htext = clm_core::$load->utf8decode($punkte[$x]->name);
 	while (($breite1+3) < $pdf->GetStringWidth($htext))
 		$htext = substr($htext,0,-1);

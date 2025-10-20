@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2023 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -207,7 +207,7 @@ if (!$archive_check) {
 					for ($f=1; $f<=3; $f++) {
 						$fwFieldName = 'tiebr'.$f;
 						$plTiebrField = 'sumTiebr'.$f;
-						if ($this->turnier->$fwFieldName > 0) {
+						if ($this->turnier->$fwFieldName > 0 AND $this->turnier->$fwFieldName < 50) {
 							echo '<td class="fw_col"><div>'.CLMtext::tiebrFormat($this->turnier->$fwFieldName, $this->players[$p]->$plTiebrField).'</div></td>';
 						}
 					}
@@ -248,7 +248,8 @@ if (!$archive_check) {
 
 						// ergebnis ermitteln
 
-						if (isset($this->matrix[$this->players[$p]->snr][$rnd]->ergebnis)) {
+//						if (isset($this->matrix[$this->players[$p]->snr][$rnd]->ergebnis)) {
+						if (isset($this->matrix[$this->players[$p]->snr][$rnd]->runde)) {
 							echo '<a href="index.php?option=com_clm&amp;view=turnier_runde&amp;turnier='.$this->turnier->id.'&amp;runde='.$this->matrix[$this->players[$p]->snr][$rnd]->runde.'&Itemid='.$itemid.'">';
 							if (isset($this->posToPlayers[$this->matrix[$this->players[$p]->snr][$rnd]->gegner]))
 								echo $this->posToPlayers[$this->matrix[$this->players[$p]->snr][$rnd]->gegner];

@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2024 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  *
@@ -253,7 +253,8 @@ if ($debug > 0) { echo "<br><br>-- Spielerdaten --";	}
 if ($debug > 0) {echo "<br>2060 ".$lang->t2060.': '.$tab_record['out'][2060][0];}
 //if ($debug > 0) { echo "<br>tab: ";	var_dump($tab_record['out'][2060]); }
 		$slength += $tab_record['length'];
-		if($paramuseAsTWZ == 0) { 
+		$twz = clm_core::$load->gen_twz($paramuseAsTWZ, $tab_record['out'][2004][0], $tab_record['out'][2003][0]);
+/*		if($paramuseAsTWZ == 0) { 
 			if ($tab_record['out'][2003][0] >= $tab_record['out'][2004][0]) { $twz = $tab_record['out'][2003][0]; } //FIDEelo; 
 			else { $twz = $tab_record['out'][2004][0]; } //start_dwz;  
 		} elseif ($paramuseAsTWZ == 1) {
@@ -263,6 +264,7 @@ if ($debug > 0) {echo "<br>2060 ".$lang->t2060.': '.$tab_record['out'][2060][0];
 			if ($tab_record['out'][2003][0]  > 0) { $twz = $tab_record['out'][2003][0]; } //FIDEelo; 
 			else { $twz = $tab_record['out'][2004][0]; } //start_dwz;
 		} else $twz = 0;
+*/
 		// Feld Typ überschreibt Feld Titel, falls dieses leer ist													
 		if ($tab_record['out'][2002][0] == '') $tab_record['out'][2002][0] = $tab_record['out'][2045][0];
 		$titel = $tab_record['out'][2002][0];
@@ -359,6 +361,7 @@ if ($debug > 1) { echo "<br>runde: $runde  brett: $brett  ergebnis: $ergebnis  -
 			}
 			if ($epaar > $paarprorunde[$runde]) {
 				$runde++;
+				if (!isset($tableprorunde[$runde]) OR $tableprorunde[$runde] == 0) break;
 				$epaar = 1;
 				$paar = 1;
 			} 
@@ -368,7 +371,7 @@ if ($debug > 1) { echo "<br>runde: $runde  brett: $brett  ergebnis: $ergebnis  -
 			$ergebnis = transcode_ergebnis($tab_record['out'][4002][0],$heim,$gegner);
 			$weiss = 0;
 			if ($ergebnis < 3) $kampflos = 0; else $kampflos = 1;
-			if (is_null($ergebnis)) $ergebnis = 8;
+			if (is_null($ergebnis)) { $ergebnis = 8; $kampflos = 1; }
 			if ($heim == 1) {
 				if ($ergebnis == 1 OR $ergebnis == 5 ) $punkte = '1';
 				elseif ($ergebnis == 2) $punkte = '0.5';
@@ -504,6 +507,7 @@ if ($debug > 1) { echo "<br>tab_record: $i ";	var_dump($tab_record); }
 		} else {
 			$runde++;
 			if ($runde > $tournament["out"][1][0]) break;
+			if ($paarprorunde[$runde] == 0) break;
 			$table = 1;
 		}
 		$spieler = $tab_record['out'][5007][0];
@@ -1082,9 +1086,9 @@ function transcode_twz($line) {
 		2 ->  2	 Elo international
 		3 ->  2	 Elo int. dann nat.
 		4 ->  0	 Elomaximum (Nat,Int)
-		5 ->  1  Elo national only
-		6 ->  2	 Elo international only  */
-	$clm_twz = array (0 => 0, 1 => 1, 2 => 2, 3 => 2, 4 => 0, 5 => 1, 6 => 2);
+		5 ->  4  Elo national only
+		6 ->  3	 Elo international only  */
+	$clm_twz = array (0 => 0, 1 => 1, 2 => 2, 3 => 2, 4 => 0, 5 => 4, 6 => 3);
 		
 	$line[0] = $clm_twz[$line[0]];
 	$line[1][2] = 'params_useAsTWZ';
@@ -1130,10 +1134,13 @@ function transcode_tiebr($group,$tournament,$line_nr,$debug) {
 		61 ->  1    1 Arranz-Sytem
 		68 ->  2    4 Anzahl Siege variabel
 		70 ->  6    2 Summe Buchholz variabel
+		80 ->  6    0 Buchholz
+		81 -> 25    0 Direktvergleich
+		84 ->  1    0 Buchholz
 	*/
 if ($debug > 1) { echo "<br>group:"; var_dump($group); } 		
-	$clm_array = array (0 => 0, 1 => 0, 5 => 51, 8 => 1, 9 => 1, 11 => 25, 19 => 13, 23 => 16, 36 => 16,
-		37 => 1, 42 => 0, 43 => 0, 44 => 0, 52 => 13, 54 => 0, 55 => 0, 59 => 0, 60 => 0, 61 => 0, 68 => 4, 70 => 2);
+//	$clm_array = array (0 => 0, 1 => 0, 5 => 51, 8 => 1, 9 => 1, 11 => 25, 19 => 13, 23 => 16, 36 => 16,
+//		37 => 1, 42 => 0, 43 => 0, 44 => 0, 52 => 13, 54 => 0, 55 => 0, 59 => 0, 60 => 0, 61 => 0, 68 => 4, 70 => 2);
 if ($debug > 1) { echo "<br>1tiebr linenr:"; var_dump($line_nr); } 		
 if ($debug > 1) { echo "<br>1tiebr line:"; var_dump($tournament["out"][$line_nr]); }		
 if ($debug > 1) { echo "<br>1tiebr line+4:"; var_dump($tournament["out"][$line_nr+4]); } 		
@@ -1198,6 +1205,15 @@ if ($debug > 1) { echo "<br>streich_schwach: $streich_schwach   streich_stark: $
 		elseif ($line[0] == 70) {		// Buchholz Summe
 			if ($streich_stark == 0 AND $streich_schwach == 0) { $line[0] = 2; }
 			elseif ($streich_stark == 0 AND $streich_schwach == 1) { $line[0] = 12; } // mit 1 Streichwert
+			else { $line[0] = 0; } }
+		elseif ($line[0] == 80) {		// Elo-Schnitt
+			if ($streich_stark == 0 AND $streich_schwach == 0) { $line[0] = 6; }
+			elseif ($streich_stark == 0 AND $streich_schwach == 1) { $line[0] = 16; } // mit 1 Streichwert
+			else { $line[0] = 0; } }
+		elseif ($line[0] == 84) {		// Buchholz
+			if ($streich_stark == 0 AND $streich_schwach == 0) { $line[0] = 1; }
+			elseif ($streich_stark == 0 AND $streich_schwach == 1) { $line[0] = 11; } // mit 1 Streichwert
+			elseif ($streich_stark == 1 AND $streich_schwach == 1) { $line[0] = 5; }	// mittlere Buchholz
 			else { $line[0] = 0; } }
 		else { $line[0] = 0; } 
 	}

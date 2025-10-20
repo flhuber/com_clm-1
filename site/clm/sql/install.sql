@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_categories` (
   `params` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_config` (
   `id` int(11) NOT NULL,
   `value` text NOT NULL,
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -106,13 +106,14 @@ CREATE TABLE IF NOT EXISTS `#__clm_dwz_spieler` (
   `joiningdate` date NOT NULL DEFAULT '1970-01-01',
   `leavingdate` date NOT NULL DEFAULT '1970-01-01',
   `synflag` tinyint(1) NOT NULL DEFAULT 0,
+  `gesperrt` tinyint(1) UNSIGNED DEFAULT NULL,
   `inofFIDEelo` smallint(4) UNSIGNED DEFAULT NULL,
-  `K` smallint(4) UNSIGNED DEFAULT NULL,
+  `Fide_Kf` smallint(4) UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sid_zps_mglnr` (`sid`,`ZPS`,`Mgl_Nr`),
   KEY `sid` (`sid`),
   KEY `ZPS` (`ZPS`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -126,7 +127,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_dwz_verbaende` (
   `Uebergeordnet` char(4) NOT NULL DEFAULT '',
   `Verbandname` varchar(45) NOT NULL DEFAULT '',
   PRIMARY KEY (`Verband`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -143,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_dwz_vereine` (
   `Vereinname` varchar(60) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `sid_ZPS` (`sid`,`ZPS`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -160,7 +161,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_ergebnis` (
   `xml_w` varchar(3) NOT NULL DEFAULT '',
   `xml_s` varchar(3) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -216,7 +217,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_liga` (
   `params` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -234,7 +235,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_logging` (
   `content` text CHARACTER SET utf8 COLLATE utf8_bin NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `id` (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -288,7 +289,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_mannschaften` (
   KEY `published` (`published`),
   KEY `sid` (`sid`),
   KEY `liga_sid` (`liga`,`sid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -322,11 +323,11 @@ CREATE TABLE IF NOT EXISTS `#__clm_meldeliste_spieler` (
   `gesperrt` tinyint(1) UNSIGNED DEFAULT NULL,
   `attr` varchar(4) DEFAULT NULL,
   `inofFIDEelo` smallint(4) UNSIGNED DEFAULT NULL,
-  `K` smallint(4) UNSIGNED DEFAULT NULL,
+  `Fide_Kf` smallint(4) UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `lid_zps_mglnr` (`lid`,`zps`,`mgl_nr`),
   KEY `lid` (`lid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -361,7 +362,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_online_registration` (
   `pid` varchar(32) NOT NULL DEFAULT '',
   `approved` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -381,7 +382,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_pgn` (
   `error` text DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `all` (`tkz`,`tid`,`dg`,`runde`,`paar`,`brett`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -398,7 +399,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_player_decode` (
   `verein` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sid_source_oname` (`sid`,`source`,`oname`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -421,7 +422,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_rangliste_id` (
   `ordering` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `gid_sid_zps` (`gid`,`sid`,`zps`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -447,7 +448,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_rangliste_name` (
   `published` tinyint(1) NOT NULL DEFAULT 0,
   `anz_sgp` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -467,7 +468,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_rangliste_spieler` (
   `gesperrt` tinyint(1) UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`Gruppe`,`ZPS`,`man_nr`,`Rang`),
   KEY `sid_ZPS_mannr_mglnr` (`sid`,`ZPS`,`man_nr`,`Mgl_Nr`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- --------------------------------------------------------
 
@@ -511,7 +512,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_rnd_man` (
   KEY `published` (`published`),
   KEY `lid_sid` (`lid`,`sid`),
   KEY `lid_dg_runde_paar` (`lid`,`dg`,`runde`,`paar`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -546,7 +547,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_rnd_spl` (
   PRIMARY KEY (`id`),
   KEY `lid_zps_spieler` (`lid`,`zps`,`spieler`),
   KEY `lid_dg_runde_paar` (`lid`,`dg`,`runde`,`paar`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -580,7 +581,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_runden_termine` (
   PRIMARY KEY (`id`),
   KEY `published` (`published`),
   KEY `liga` (`liga`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -603,7 +604,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_saison` (
   PRIMARY KEY (`id`),
   KEY `published` (`published`),
   KEY `archiv` (`archiv`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -643,7 +644,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_dwz_spieler` (
   UNIQUE KEY `sid_zps_mglnr` (`sid`,`ZPS`,`Mgl_Nr`),
   KEY `sid` (`sid`),
   KEY `ZPS` (`ZPS`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -700,7 +701,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_liga` (
   `params` text NOT NULL,
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -745,7 +746,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_mannschaften` (
   KEY `published` (`published`),
   KEY `sid` (`sid`),
   KEY `swt_id` (`swt_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -782,7 +783,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_meldeliste_spieler` (
   `attr` varchar(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sid_swtid_manid_zps_mglnr` (`sid`,`swt_id`,`man_id`,`zps`,`mgl_nr`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -824,7 +825,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_rnd_man` (
   PRIMARY KEY (`id`),
   KEY `published` (`published`),
   KEY `swt_id` (`swt_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -855,7 +856,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_rnd_spl` (
   `dwz_edit` mediumint(5) UNSIGNED DEFAULT NULL,
   `dwz_editor` int(11) UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -889,7 +890,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_runden_termine` (
   `enddatum` date NOT NULL DEFAULT '1970-01-01',
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -937,7 +938,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_turniere` (
   `niederk` decimal(2,1) UNSIGNED DEFAULT 0.0,
   PRIMARY KEY (`swt_tid`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -966,7 +967,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_turniere_rnd_spl` (
   `ordering` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `turnier_dg_runde_brett_heim` (`swt_tid`,`dg`,`runde`,`brett`,`heim`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -999,7 +1000,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_turniere_rnd_termine` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `turnier_dg_runde` (`swt_tid`,`dg`,`nr`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1019,7 +1020,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_turniere_teams` (
   `published` mediumint(3) UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tid_tlnnr` (`swt_tid`,`tln_nr`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1079,7 +1080,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_swt_turniere_tlnr` (
   `ordering` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`,`zps`,`mgl_nr`,`status`),
   UNIQUE KEY `turnier_snr` (`swt_tid`,`snr`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1114,7 +1115,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_termine` (
   `last_modified` varchar(16) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1162,7 +1163,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_turniere` (
   `dateRegistration` date NOT NULL DEFAULT '1970-01-01',
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1190,7 +1191,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_turniere_rnd_spl` (
   `pgn` text DEFAULT NULL,
   `ordering` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1221,7 +1222,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_turniere_rnd_termine` (
   `ordering` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1256,7 +1257,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_turniere_sonderranglisten` (
   `femaleYear_younger_than` year(4) DEFAULT NULL,
   `femaleYear_older_than` year(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1275,7 +1276,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_turniere_teams` (
   `published` mediumint(3) UNSIGNED NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   UNIQUE KEY `tid_tlnnr` (`tid`,`tln_nr`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1336,10 +1337,11 @@ CREATE TABLE IF NOT EXISTS `#__clm_turniere_tlnr` (
   `checked_out_time` datetime DEFAULT NULL,
   `ordering` int(11) NOT NULL DEFAULT 0,
   `inofFIDEelo` smallint(4) UNSIGNED DEFAULT NULL,
-  `K` smallint(4) UNSIGNED DEFAULT NULL,
+  `Fide_Kf` smallint(4) UNSIGNED DEFAULT NULL,
+  `perm_board` smallint(4) UNSIGNED DEFAULT NULL,
   PRIMARY KEY (`id`,`zps`,`mgl_nr`,`status`),
   KEY `turnier_snr` (`turnier`,`snr`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1361,6 +1363,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_user` (
   `zps` varchar(5) DEFAULT NULL,
   `mglnr` varchar(5) DEFAULT NULL,
   `PKZ` varchar(9) DEFAULT NULL,
+  `fideid` int(11) UNSIGNED DEFAULT NULL,
   `org_exc` enum('0','1') NOT NULL DEFAULT '0',
   `mannschaft` smallint(3) UNSIGNED DEFAULT NULL,
   `published` smallint(3) UNSIGNED DEFAULT NULL,
@@ -1374,7 +1377,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_user` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `sid_jid` (`sid`,`jid`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -1392,7 +1395,7 @@ CREATE TABLE IF NOT EXISTS `#__clm_usertype` (
   `params` text NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `usertype` (`usertype`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;
 
 -- --------------------------------------------------------
 
@@ -1437,9 +1440,67 @@ CREATE TABLE IF NOT EXISTS `#__clm_vereine` (
   `ordering` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
   KEY `published` (`published`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+--
+-- Tabellenstrukturen für Tabellen `#__clm_arbiter*`
+--
+
+CREATE TABLE IF NOT EXISTS `#__clm_arbiter` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `uuid` varchar(64) NOT NULL DEFAULT 'Fehler',
+  `geloescht` timestamp NULL DEFAULT NULL,
+  `nurlokal` varchar(1) DEFAULT 'Y',
+  `source` varchar(64) DEFAULT NULL,
+  `title` varchar(3) DEFAULT NULL,
+  `name` varchar(32) DEFAULT NULL,
+  `vorname` varchar(32) DEFAULT NULL,
+  `fideid` int(11) DEFAULT 0,
+  `fidefed` char(3) DEFAULT 'GER',
+  `published` mediumint(11) UNSIGNED DEFAULT NULL,
+  `ordering` int(11) DEFAULT 0,
+  `pkz` int(11) DEFAULT 0,
+  `strasse` varchar(64) DEFAULT NULL,
+  `ort` varchar(64) DEFAULT NULL,
+  `koord` varchar(64) DEFAULT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `telefon` varchar(128) DEFAULT NULL,
+  `mobil` varchar(128) DEFAULT NULL,
+  `bemerkungen` text DEFAULT NULL,
+  `bem_int` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `fideid` (`fideid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+CREATE TABLE IF NOT EXISTS `#__clm_arbiterlicense` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+CREATE TABLE IF NOT EXISTS `#__clm_arbiter_arbiterlicense` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `r_arbiter` int(11) NOT NULL,
+  `r_arbiterlicense` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+
+CREATE TABLE IF NOT EXISTS `#__clm_arbiter_turnier` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `fideid` int(11) UNSIGNED NOT NULL,
+  `turnier` int(11) DEFAULT NULL,
+  `liga` int(11) DEFAULT NULL,
+  `dg` tinyint(3) UNSIGNED NOT NULL,
+  `runde` tinyint(3) UNSIGNED NOT NULL,
+  `paar` tinyint(3) UNSIGNED NOT NULL,
+  `trole` char(3) DEFAULT NULL,
+  `role` char(3) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+

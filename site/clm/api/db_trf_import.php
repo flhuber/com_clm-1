@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2023 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  *
@@ -10,6 +10,7 @@
  * Ergänzungen zum Standard: XX? von JaVaFo, XC? von CLM
 */
 function clm_api_db_trf_import($file,$season,$turnier,$group=false,$update=false,$test=false) {
+	set_time_limit(180);
 	$group = false;
 //echo "<br>file:"; var_dump($file); //die('ende-controller');	
     $lang = clm_core::$lang->imports;
@@ -43,6 +44,7 @@ if ($debug > 0) echo "<br>turnier: ".$turnier; 	//echo "<br>end"; //die();
 	$xxs_nieder = 0.0; $xxs_niederk = 0.0;
 	$xxs_zpb = 0.0; $xxs_hpb = 0.5; $xxs_fpb = 1.0; $xxs_pab = 1.0;
 	$xxs_fw = 1.0; $xxs_fl = 0.0;
+	$rundenzahl = 0;
 	// Durchgehen des Arrays inkl. Zuordnund der Zeilen
 	// read common tournament data
 	// Allgemeine Turnierdaten auslesen
@@ -162,6 +164,19 @@ if ($debug > 0) { echo "<br>e_xxs"; var_dump($e_xxs); }
 	elseif (isset($xxs_pab) AND $xxs_pab == 1 ) $erg_pab = 5; 
 	else $erg_pab = 13;
 if ($debug > 0) { echo "<br>xxs_pab: $xxs_pab   erg: $erg_pab "; }
+	if ($rundenzahl == 0) {  // xxr fehlt oder ohne Angabe
+		foreach ($a_spielerdaten as $line) {
+			$i = 0;
+			while ((strlen($line) > (98+($i*10))) AND (substr($line,(98+($i*10)),1)) > ' ') {  // result gesetzt
+//				echo "<br>$i ".substr($line,(98+($i*10)),1);
+				$rundenzahl = $i+1;
+				$i++;
+			}	
+if ($debug > 0) { echo "<br> ( Rundenzahl: ".$rundenzahl." )" ;	}
+			break;
+		}
+	}
+//die();
 	if (!isset($rundendata)) $rundendata = '';
 	if (!isset($rundentime)) $rundentime = '';
 if ($debug > 0) { echo "<br>name:"; var_dump($name); }
@@ -295,7 +310,7 @@ if ($debug > 0) { echo "<br>snr: $snr  geschlecht: $geschlecht  titel: $titel  n
 			if (is_numeric($twz)) $twz = (integer) $twz; else $twz = 0;
 		} else {
 			$start_dwz = 0;
-			$FIDEelo   = 0;
+//			$FIDEelo   = 0;  // es wird dann FIDEelo aus Spielerkarte 001 genommen
 			$twz = 0;
 		}
 
@@ -412,8 +427,12 @@ if ($debug > 0) { echo "<br>Runde: ".$i."  Brett: $j   ".$a_name[$a_paarung[$i][
 						$ergebnis = 4; break;
 					case '+':
 						$ergebnis = 5; break;
+					case 'F':
+						$ergebnis = 11; break;
 					case 'H':
 						$ergebnis = 12; break;
+					case 'Z':
+						$ergebnis = 13; break;
 					case 'U':
 						$ergebnis = $erg_pab; break;
 					default:

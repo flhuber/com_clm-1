@@ -1,9 +1,14 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2023 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
+*/
+/* Funktion: Datenbereitstellung zur Eingabe/Korrektur einer Ergebnismeldung (Teamwettbewerb)
+   Eingang: Identdaten der Buchung
+   Ausgang: Erfolgsstatus (true/false) einschl. Bestätigungs- oder Fehlermeldung
+			sowie die Daten als array 
 */
 function clm_api_db_report($liga, $runde, $dg, $paar) {
 
@@ -63,12 +68,14 @@ function clm_api_db_report($liga, $runde, $dg, $paar) {
 	if (!isset($out["paar"][0])) {
 		return array(false, "e_reportError");
 	}	
- 
+
 	// Namen und Email der Mannschaftsleiter
 	if (isset($out["paar"][0]->heim_mf) AND $out["paar"][0]->heim_mf > 0) {
 		$hmfModel = " SELECT name, email "
-			." FROM #__users "
-			." WHERE id = ".$out["paar"][0]->heim_mf 
+//			." FROM #__users "
+//			." WHERE id = ".$out["paar"][0]->heim_mf 
+			." FROM #__clm_user "
+			." WHERE jid = ".$out["paar"][0]->heim_mf." AND sid = ".$out["paar"][0]->sid
 			;
 		$out["hmf"] = clm_core::$db->loadObjectList($hmfModel);
 		// Kein Ergebnis -> Daten Inkonsistent oder falsche Eingabe
@@ -78,8 +85,10 @@ function clm_api_db_report($liga, $runde, $dg, $paar) {
 	}
 	if (isset($out["paar"][0]->gast_mf) AND $out["paar"][0]->gast_mf > 0) {
 		$gmfModel = " SELECT name, email "
-			." FROM #__users "
-			." WHERE id = ".$out["paar"][0]->gast_mf 
+//			." FROM #__users "
+//			." WHERE id = ".$out["paar"][0]->gast_mf 
+			." FROM #__clm_user "
+			." WHERE jid = ".$out["paar"][0]->gast_mf." AND sid = ".$out["paar"][0]->sid
 			;
 		$out["gmf"] = clm_core::$db->loadObjectList($gmfModel);
 		// Kein Ergebnis -> Daten Inkonsistent oder falsche Eingabe
@@ -87,7 +96,7 @@ function clm_api_db_report($liga, $runde, $dg, $paar) {
 			return array(false, "e_reportError");
 		}	
 	}
-	
+
  	$zps = clm_core::$db->user->get($id)->zps;
 	 
 	// Ist der Benutzer auch wirklich ein Spieler der beteiligten Mannschaften?
@@ -159,7 +168,10 @@ function clm_api_db_report($liga, $runde, $dg, $paar) {
 	
 	// Wurden für die Heimmannschaft schon Spieler gemeldet?
 	if (!isset($out["heim"][0])) {
-		return array(false, "e_reportListHome");
+		if ($someData[0]->hmnr == 0)
+			return array(false, "m_reportListHomeSpielfrei");
+		else
+			return array(false, "e_reportListHome");
 	}
 	
 	// Dürfen nur Heimspieler melden?
@@ -204,7 +216,10 @@ function clm_api_db_report($liga, $runde, $dg, $paar) {
 	
 	// Wurden für die Gastmannschaft schon Spieler gemeldet?
 	if (!isset($out["gast"][0])) {
-		return array(false, "e_reportListGuest");
+		if ($someData[0]->gmnr == 0)
+			return array(false, "w_reportListGuestSpielfrei");
+		else
+			return array(false, "e_reportListGuest");
 	}
 	
 	$ligaModel = "SELECT a.*,t.datum as datum FROM #__clm_liga as a"
@@ -221,8 +236,10 @@ function clm_api_db_report($liga, $runde, $dg, $paar) {
 	// Namen und Email des Staffelleiters
 	if (isset($out["liga"][0]->sl) AND $out["liga"][0]->sl > 0) {
 		$slModel = " SELECT name, email "
-			." FROM #__users "
-			." WHERE id = ".$out["liga"][0]->sl 
+//			." FROM #__users "
+//			." WHERE id = ".$out["liga"][0]->sl 
+			." FROM #__clm_user "
+			." WHERE jid = ".$out["liga"][0]->sl." AND sid = ".$out["paar"][0]->sid
 			;
 		$out["sl"] = clm_core::$db->loadObjectList($slModel);
 		// Kein Ergebnis -> Daten Inkonsistent oder falsche Eingabe

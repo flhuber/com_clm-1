@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2024 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -52,10 +52,16 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 			$path 		= JPATH_COMPONENT . DIRECTORY_SEPARATOR . "swt" . DIRECTORY_SEPARATOR;
 			$swt 		= $path.$filename;
 					
+			//Datei-Version
+			$file_version			= CLMSWT::readInt($swt,609,2);
+		
 			//Einstellungen auslesen
 			$anz_runden		 		= CLMSWT::readInt($swt,1,2);
 			$anz_durchgaenge 		= CLMSWT::readInt($swt,599,1);
-			$aktuelle_runde			= CLMSWT::readInt($swt,3,2);
+			if ($file_version == 724)
+				$aktuelle_runde			= $anz_runden;
+			else 
+				$aktuelle_runde			= CLMSWT::readInt($swt,3,2);
 			$aktueller_durchgang	= CLMSWT::readInt($swt,598,1);		
 			$ausgeloste_runden		= CLMSWT::readInt($swt,5,2);
 			$modus = $this->_calculateCLMModus(CLMSWT::readInt($swt,596,1));
@@ -99,19 +105,24 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 //				if (!isset($runde->datum)) $runde->datum = '';
 				if ($runde->datum == '0000-00-00' OR $runde->datum == '1970-01-01') $runde->datum = '';
 				if ($runde->datum == '') {
-					$test = 'datum'.$rnd;
-					$d1 = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4),1);
-					$d2 = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4)+1,1);
-					$hh = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4)+2,1);
-					$mm = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4)+3,1);
-					$lt = $d1 + ($d2 * 256);
-					if ($lt > 0) {
-					$rdate = date_create('1899-12-30');
+					if ($file_version == 724) {
+						$runde->datum = '';
+						$runde->startzeit = '';
+					} else {
+						$test = 'datum'.$rnd;
+						$d1 = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4),1);
+						$d2 = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4)+1,1);
+						$hh = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4)+2,1);
+							$mm = CLMSWT::readInt($swt,11457 +(($rnd-1) * 4)+3,1);
+						$lt = $d1 + ($d2 * 256);
+						if ($lt > 0) {
+						$rdate = date_create('1899-12-30');
 						$ltstring = $lt." days";
 						//date_add($rdate, date_interval_create_from_date_string($ltstring));  	// for >= php 5.3.0 
 						date_modify($rdate, '+'.$lt.' days');									// for >= php 5.2.0 too
 						$runde->datum = date_format($rdate, 'Y-m-d');
 						$runde->startzeit = sprintf('%02d', $hh).':'.sprintf('%02d', $mm).':00';
+						}
 					}
 				}
 //				if (!isset($runde->startzeit)) $runde->startzeit = '';
@@ -217,11 +228,17 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 		$path 		= JPATH_COMPONENT . DIRECTORY_SEPARATOR . "swt" . DIRECTORY_SEPARATOR;
 		$swt 		= $path.$filename;
 				
+		//Datei-Version
+		$file_version			= CLMSWT::readInt($swt,609,2);
+		
 		//Einstellungen zur Berechnung des offset auslesen
 		$anz_teilnehmer 		= CLMSWT::readInt($swt,7,2);
 		$anz_runden		 		= CLMSWT::readInt($swt,1,2);
 		$anz_durchgaenge 		= CLMSWT::readInt($swt,599,1);
-		$aktuelle_runde			= CLMSWT::readInt($swt,3,2);
+			if ($file_version == 724)
+				$aktuelle_runde			= $anz_runden;
+			else 
+				$aktuelle_runde			= CLMSWT::readInt($swt,3,2);
 		$aktueller_durchgang	= CLMSWT::readInt($swt,598,1);
 		$ausgeloste_runden		= CLMSWT::readInt($swt,5,2);
 		$modus = $this->_calculateCLMModus(CLMSWT::readInt($swt,596,1));
@@ -239,7 +256,9 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 		
 		
 		//offset f�r Spielerpaarungen setzen
-		$offset = 13384;
+//		$offset = 13384;
+		if ($file_version == 724) $offset = 3894;
+		else $offset = 13384;
 		
 		//Paarungen auslesen
 		$sp = 1;
@@ -497,6 +516,8 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 			foreach($this->_runden as $rnd => $runde) {
 			  $i = $runde->nr;	  
 			  if ($i >= $rfirst AND $i <= $rlast) {
+				$hdatum = CLMSWT::getFormValue('datum','1970-01-01','string',$rnd);
+				if ($hdatum == '0000-00-00' OR $hdatum == '') $hdatum = '1970-01-01';
 				$insert_query .= 	" ( 
 										".CLMSWT::getFormValue('sid',null,'int').", 
 										'".CLMSWT::getFormValue('name','','string',$rnd)."', 										
@@ -504,7 +525,7 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 										".CLMSWT::getFormValue('swt_tid',null,'int').", 
 										".CLMSWT::getFormValue('dg',null,'int',$rnd).", 
 										".CLMSWT::getFormValue('runde',null,'int',$rnd).",
-										'".CLMSWT::getFormValue('datum','1970-01-01','string',$rnd)."', 
+										'".$hdatum."', 
 										'".CLMSWT::getFormValue('startzeit','00:00:00','string',$rnd)."', 
 										".CLMSWT::getFormValue('abgeschlossen',0,'int',$rnd).", 
 										".CLMSWT::getFormValue('tl_ok',0,'int',$rnd).", 
@@ -545,6 +566,13 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 		$rfirst = clm_core::$load->request_int('rfirst', 0);
 		$rlast  = clm_core::$load->request_int('rlast', 0);
 		
+		//Name und Verzeichnis der SWT-Datei
+		$filename 	= clm_core::$load->request_string('swt_file', '');
+		$path 		= JPATH_COMPONENT . DIRECTORY_SEPARATOR . "swt" . DIRECTORY_SEPARATOR;
+		$swt 		= $path.$filename;
+		//Anzahl der Teilnehmer aus der Turnierdatei
+		$anz_teilnehmer 		= CLMSWT::readInt($swt,7,2);
+
 		if(!empty($this->_runden)) {
 			$ispl = 0;
 			$insert_query = "INSERT IGNORE INTO 
@@ -601,8 +629,8 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 					$ispl++;
 				  }
 				} else {
-				  for ($ii = 1; $ii <= 13; $ii++) { 
-					
+//				  for ($ii = 1; $ii <= 13; $ii++) { 
+				  for ($ii = 1; $ii <= intdiv(($anz_teilnehmer + 1),2); $ii++) { 					
 					//Paarungsdaten f�r Wei�
 					$insert_query .= 	" ( 
 											".CLMSWT::getFormValue('sid',null,'int').", 										
@@ -732,7 +760,7 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 		// Nachdem das Turnier kopiert wurde existiert auf jeden Fall eine Turnier-ID != 0
 		// Diese soll nun f�r die weiteren Aufgaben benutzt werden
 		$tid = $this->_getTid($swt_tid);
-		
+		$_POST["tid"] = $tid;
 		// Teilnehmer kopieren
 		if(!$this->_copyTeilnehmer($swt_tid, $update, $tid)){
 			JFactory::getApplication()->enqueueMessage( JText::_('SWT_STORE_ERROR_COPY_PLAYERS'),'error' );
@@ -771,9 +799,18 @@ class CLMModelSWTTurnierErg extends JModelLegacy {
 								WHERE id = ".$tid.";";
 			$db->setQuery($select_query);
 			$turnier_orig = $db->loadObject();
-			if ($turnier_orig->teil != $turnier->teil OR $turnier_orig->rnd != $turnier->rnd) {
+			if ($turnier_orig->teil != $turnier->teil OR $turnier_orig->rnd != $turnier->rnd OR
+			    $turnier_orig->dateStart != $turnier->dateStart OR $turnier_orig->dateEnd != $turnier->dateEnd OR
+			    $turnier_orig->name != $turnier->name OR $turnier_orig->tiebr1 != $turnier->tiebr1 OR
+			    $turnier_orig->tiebr2 != $turnier->tiebr2 OR $turnier_orig->tiebr3 != $turnier->tiebr3) {
 				$turnier_orig->teil = $turnier->teil;
 				$turnier_orig->rnd  = $turnier->rnd;
+				$turnier_orig->dateStart = $turnier->dateStart;
+				$turnier_orig->dateEnd  = $turnier->dateEnd;
+				$turnier_orig->name = $turnier->name;
+				$turnier_orig->tiebr1  = $turnier->tiebr1;
+				$turnier_orig->tiebr2  = $turnier->tiebr2;
+				$turnier_orig->tiebr3  = $turnier->tiebr3;
 				if($db->updateObject('#__clm_turniere',$turnier_orig,'id')) {
 					return true;
 				} else {

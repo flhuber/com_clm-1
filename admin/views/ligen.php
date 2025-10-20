@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2024 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -13,6 +13,8 @@ class CLMViewLigen
 {
 	public static function setLigaToolbar($new, $sid)
 	{
+		$lang = clm_core::$lang->arbiter;
+
 		if (!$new) { $text = JText::_( 'Edit' );}
 		else { $text = JText::_( 'New' );}
 		clm_core::$load->load_css("icons_images");
@@ -20,6 +22,8 @@ class CLMViewLigen
 		if ($new OR (clm_core::$db->saison->get($sid)->published == 1 AND clm_core::$db->saison->get($sid)->archiv == 0)) {
 			JToolBarHelper::save( 'save' );
 			JToolBarHelper::apply( 'apply' );
+			JToolBarHelper::custom('arbiter','edit.png','edit_f2.png',$lang->arbiter_assign,false);
+			JToolBarHelper::custom( 'email', 'mail.png', 'mail_f2.png', JText::_('LEAGUE_MAIL_TO_ML'),false); 
 		}
 		JToolBarHelper::cancel();
 	}
@@ -35,6 +39,8 @@ class CLMViewLigen
 	$sl_mail= $config->sl_mail;
 	$countryversion= $config->countryversion;
 	$import_pgn = $config->import_pgn;
+	$fe_sl_ergebnisse = $config->fe_sl_ergebnisse;
+	$fe_ar_ergebnisse = $config->fe_ar_ergebnisse;
 	?>
 	<?php 
 	//Liga-Parameter aufbereiten
@@ -65,7 +71,7 @@ class CLMViewLigen
 	if (!isset($row->params['pgnlname']))  {   //Standardbelegung
 		$row->params['pgnlname'] = ''; }
 	if (!isset($row->params['anz_sgp']))  {   //Standardbelegung
-		$row->params['anz_sgp'] = 1; }
+		$row->params['anz_sgp'] = 0; }
 	if (!isset($row->params['deadline_roster']))  {   //Standardbelegung
 		$row->params['deadline_roster'] = '1970-01-01'; }
 	if (!isset($row->params['color_order']))  {   //Standardbelegung
@@ -105,6 +111,10 @@ class CLMViewLigen
 		$row->params['dwz_date'] = '1970-01-01'; }
 	if (!isset($row->params['import_date']))  {   //Standardbelegung
 		$row->params['import_date'] = '1970-01-01'; }
+	if (!isset($row->params['fe_sl_ergebnisse']))  {   //Standardbelegung
+		$row->params['fe_sl_ergebnisse'] = '0'; }
+	if (!isset($row->params['fe_ar_ergebnisse']))  {   //Standardbelegung
+		$row->params['fe_ar_ergebnisse'] = '0'; }
 
 	// Auswahlfelder durchsuchbar machen
 	clm_core::$load->load_js("suche_liste");
@@ -187,7 +197,7 @@ class CLMViewLigen
 		<td width="20%" nowrap="nowrap">
 		<label for="name"><?php echo JText::_( 'LEAGUE_NAME' ); ?></label>
 		</td><td colspan="2">
-		<input class="inputbox" type="text" name="name" id="name" size="20" maxlength="30" value="<?php echo $row->name; ?>" />
+		<input class="inputbox" type="text" name="name" id="name" size="30" maxlength="100" value="<?php echo $row->name; ?>" />
 		</td>
 		<td nowrap="nowrap">
 		<label for="sl"><?php echo JText::_( 'LEAGUE_CHIEF' ); ?></label>
@@ -744,6 +754,29 @@ class CLMViewLigen
 		</fieldset></td>
 	</tr>
 	<?php } ?>
+	<?php if ($fe_sl_ergebnisse == 1 OR $fe_ar_ergebnisse == 1) { ?>
+	  <tr>
+		<?php if ($fe_sl_ergebnisse == 1 ) { ?>
+			<td nowrap="nowrap" colspan="2">
+				<label for="fe_sl_ergebnisse">
+					<span class="editlinktip hasTip" title="<?php echo JText::_( 'OPTION_FE_SL_ERGEBNISSE_HINT' );?>">
+					<?php echo JText::_( 'OPTION_FE_SL_ERGEBNISSE' )." : "; ?></span></label>
+			</td><td colspan="1"><fieldset class="radio">
+				<?php echo JHtml::_('select.booleanlist', 'params[fe_sl_ergebnisse]', 'class="inputbox"', $row->params['fe_sl_ergebnisse']); ?>
+		</fieldset></td>
+		<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+		<?php } ?>
+		<?php if ($fe_ar_ergebnisse == 1 ) { ?>
+			<td nowrap="nowrap" colspan="2">
+				<label for="fe_ar_ergebnisse">
+					<span class="editlinktip hasTip" title="<?php echo JText::_( 'OPTION_FE_AR_ERGEBNISSE_HINT' );?>">
+					<?php echo JText::_( 'OPTION_FE_AR_ERGEBNISSE' )." : "; ?></span></label>
+			</td><td colspan="1"><fieldset class="radio">
+				<?php echo JHtml::_('select.booleanlist', 'params[fe_ar_ergebnisse]', 'class="inputbox"', $row->params['fe_ar_ergebnisse']); ?>
+		</fieldset></td>
+		<?php } ?>
+	  </tr>
+	<?php } ?>
     <tr>	
 	<td nowrap="nowrap" colspan="2">
 	<label for="mail"><?php echo JText::_( 'LEAGUE_MAIL' ); ?></label>
@@ -860,6 +893,7 @@ class CLMViewLigen
 	<input type="hidden" name="section" value="ligen" />
 	<input type="hidden" name="option" value="com_clm" />
 	<input type="hidden" name="id" value="<?php echo $row->id; ?>" />
+	<input type="hidden" name="lid" value="<?php echo $row->id; ?>" />
 	<input type="hidden" name="sid_alt" value="<?php echo $row->sid; ?>" />
 <!---	<input type="hidden" name="cid" value="<?php //echo $row->cid; ?>" />
 	<input type="hidden" name="client_id" value="<?php //echo $row->cid; ?>" />

@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2023 CLM Team  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -132,6 +132,9 @@ class CLMTournament extends stdClass {
 	* errechnet/aktualisiert Rangliste/Punktesummen eines Turniers
 	*/
 	function calculateRanking() {
+		
+		// 'virtueller Gegner' gültig bis laut FIDE-Beschluß
+		$enddate_vg = '2024-07-31';
 	
 		// Parameter auslesen, für FIDE-Ranglistenkorrektur und TWZ
 		$query = 'SELECT `params`'
@@ -160,7 +163,8 @@ class CLMTournament extends stdClass {
 		$remiss = $this->data->remiss;
 		$nieder = $this->data->nieder;
 		$niederk = $this->data->niederk;
-	
+		$dateEnd = $this->data->dateEnd;
+
 		//Turnierteilnehmer
 		$query = " SELECT a.* "
 			." FROM #__clm_turniere_tlnr as a "
@@ -173,7 +177,7 @@ class CLMTournament extends stdClass {
 	
 		// TWZ ggf. korrigieren
 		foreach($player as $player1) {
-			if($paramuseAsTWZ == 0) { 
+/*			if($paramuseAsTWZ == 0) { 
 				if ($player1->FIDEelo >= $player1->start_dwz) { $player1->twz = $player1->FIDEelo; }
 				else { $player1->twz = $player1->start_dwz; } 
 			} elseif ($paramuseAsTWZ == 1) {
@@ -183,6 +187,8 @@ class CLMTournament extends stdClass {
 				if ($player1->FIDEelo > 0) { $player1->twz = $player1->FIDEelo; }
 				else { $player1->twz = $player1->start_dwz; }
 			}	
+*/
+			$player1->twz = clm_core::$load->gen_twz($paramuseAsTWZ, $player1->start_dwz, $player1->FIDEelo);
 		}
 
 		//bisherige Rankingdaten löschen
@@ -340,7 +346,13 @@ class CLMTournament extends stdClass {
 				$array_PlayerWins[$value->tln_nr] += 1;
 				$array_PlayerSumWert[$value->tln_nr] += ($maxround - $value->runde +1);
 				if (($value->ergebnis == 5 OR $value->ergebnis == 11) AND $paramTBFideCorrect == 1) { // kampflos gewonnen und FIDE-Korrektur eingestellt?
-					$array_PlayerPunkteTB[$value->tln_nr] += $vremis; // FW-Korrektur Teil 1
+					if ($dateEnd > $enddate_vg) 
+						if ($value->runde == $runden) 
+							$array_PlayerPunkteTB[$value->tln_nr] += $vsieg; // FW-Korrektur Teil 1
+						else
+							$array_PlayerPunkteTB[$value->tln_nr] += $vsieg; // FW-Korrektur Teil 1
+					else
+						$array_PlayerPunkteTB[$value->tln_nr] += $vremis; // FW-Korrektur Teil 1
 				} else {
 					$array_PlayerPunkteTB[$value->tln_nr] += $vsieg;
 				}
@@ -354,7 +366,13 @@ class CLMTournament extends stdClass {
 			} elseif ($value->ergebnis == 4) { 							// kampflos verloren 
 				$array_PlayerPunkte[$value->tln_nr] += $niederk;
 				if ($paramTBFideCorrect == 1)  							// FIDE-Korrektur eingestellt? -> FW-Korrektur Teil 1
-					$array_PlayerPunkteTB[$value->tln_nr] += $vremis;
+					if ($dateEnd > $enddate_vg) 
+						if ($value->runde == $runden) 
+							$array_PlayerPunkteTB[$value->tln_nr] += $nieder; // FW-Korrektur Teil 1
+						else
+							$array_PlayerPunkteTB[$value->tln_nr] += $nieder; // FW-Korrektur Teil 1
+					else
+						$array_PlayerPunkteTB[$value->tln_nr] += $vremis;
 			} elseif ($value->ergebnis == 6) { 							// kampflos beide verloren -:- und FIDE-Korrektur eingestellt?
 				$array_PlayerPunkte[$value->tln_nr] += $niederk;
 				if ($paramTBFideCorrect == 1)  							// FIDE-Korrektur eingestellt? -> FW-Korrektur Teil 1
@@ -365,8 +383,24 @@ class CLMTournament extends stdClass {
 					$array_PlayerPunkteTB[$value->tln_nr] += $vremis;
 			} elseif ($value->ergebnis == 8) { 							// spielfrei und FIDE-Korrektur eingestellt?
 				$array_PlayerPunkte[$value->tln_nr] += $niederk;
-				if ($paramTBFideCorrect == 1)  							// FIDE-Korrektur eingestellt? -> FW-Korrektur Teil 1
-					$array_PlayerPunkteTB[$value->tln_nr] += $vremis;
+				if ($paramTBFideCorrect == 1) { 							// FIDE-Korrektur eingestellt? -> FW-Korrektur Teil 1
+					if ($dateEnd > $enddate_vg) {
+						// Gibt es noch andere Ergebnisse bis Turnierende?
+						$s_erg8 = 0;
+						for ($i = ($value->runde + 1); $i <= $maxround; $i++) {
+							If (isset($matrix[$value->tln_nr][$value->dg][$i])) $s_erg8 = 1;
+							}
+						if ($s_erg8 == 1) $array_PlayerPunkteTB[$value->tln_nr] += 0;
+						else 
+							if ($value->runde == $runden) 
+								$array_PlayerPunkteTB[$value->tln_nr] += $vremis; // FW-Korrektur Teil 1
+//								$array_PlayerPunkteTB[$value->tln_nr] += $vsieg; // FW-Korrektur Teil 1
+							else
+//								$array_PlayerPunkteTB[$value->tln_nr] += $niederk; // FW-Korrektur Teil 1
+								$array_PlayerPunkteTB[$value->tln_nr] += $vremis; // FW-Korrektur Teil 1
+					} else
+						$array_PlayerPunkteTB[$value->tln_nr] += $vremis;
+				}
 			} elseif ($value->ergebnis == 13) { 						// kampflos beide verloren 0:- und FIDE-Korrektur eingestellt?
 				$array_PlayerPunkte[$value->tln_nr] += $niederk;
 				if ($paramTBFideCorrect == 1)  							// FIDE-Korrektur eingestellt? -> FW-Korrektur Teil 1
@@ -384,82 +418,102 @@ class CLMTournament extends stdClass {
 			// Buchholz
 			if (in_array(1, $arrayFW) OR in_array(2, $arrayFW) OR in_array(11, $arrayFW) OR in_array(12, $arrayFW) OR in_array(5, $arrayFW) OR in_array(15, $arrayFW)) { // beliebige Buchholz als TieBreaker gewünscht?
 				if ($value->ergebnis < 3 OR $value->ergebnis == 9 OR $value->ergebnis == 10 OR $paramTBFideCorrect == 0) {
-					$array_PlayerBuchOpp[$value->tln_nr][] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerBuchOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
 				} else { //Ranglistenkorrektur nach FIDE (Teil 2) nur für CH-Turniere
-					$query = "SELECT tln_nr, heim, gegner, dg, runde, ergebnis FROM `#__clm_turniere_rnd_spl`"
-					. " WHERE turnier = ".$this->turnierid
-					. " AND tln_nr = ".$value->tln_nr
-					. " AND ergebnis IS NOT NULL"
-					. " ORDER BY dg ASC, runde ASC"
-					;
-					$this->_db->setQuery( $query );
-					$matchDataSnr = $this->_db->loadObjectList();
-					$PlayerPunkteKOR = 0;
-					foreach ($matchDataSnr as $key => $valuesnr) {
-						if ($maxround < ((($valuesnr->dg - 1) * $runden) + $valuesnr->runde)) continue;  // Ignorieren von bereits gesetzten kampflos oder spielfrei in Folgerunden
-						if (($valuesnr->dg < $value->dg) OR ($valuesnr->dg == $value->dg AND $valuesnr->runde < $value->runde)) {
-							if ($valuesnr->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
-							if ($valuesnr->heim == 1) $vremis = $remis; else $vremis = $remiss;
-							if ($valuesnr->ergebnis == 1) $PlayerPunkteKOR += $vsieg; // Sieg
-							elseif ($valuesnr->ergebnis == 2 OR $valuesnr->ergebnis == 10 OR $valuesnr->ergebnis == 12) $PlayerPunkteKOR += $vremis; // remis
-							elseif ($valuesnr->ergebnis == 5 OR $valuesnr->ergebnis == 11) $PlayerPunkteKOR += $vsieg; // Sieg kampflos
-						}
-					}	
-					if ($value->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
-					if ($value->heim == 1) $vremis = $remis; else $vremis = $remiss;
-					if ($value->ergebnis == 4 OR $value->ergebnis == 8) { $PlayerPunkteKOR += $vsieg; }// Gegner gewinnt kampflos oder spielfrei
-					if ($value->ergebnis == 12) { $PlayerPunkteKOR += $vremis; }// Gegner spielt kampflos remis                                                                                 neu
-	  				if ($value->ergebnis == 3 OR $value->ergebnis == 6 OR $value->ergebnis == 13) { $PlayerPunkteKOR += $vsieg; }// Gegner verliert auch kampflos, ist aber egal
-					//$PlayerPunkteKOR += 0.5 * (($runden * $dg) - (($value->dg - 1) * $runden) - $value->runde);
-					$PlayerPunkteKOR += ($vremis * (($maxround) - (($value->dg - 1) * $runden) - $value->runde));
-					$array_PlayerBuchOpp[$value->tln_nr][] = $PlayerPunkteKOR; // Array mit Gegnerwerten - für Streichresultat
+					if ($dateEnd > $enddate_vg) {
+						if ($value->gegner == 0)
+//							if ($value->ergebnis == 12)
+							if ($value->runde == 1)
+								$array_PlayerBuchOpp[$value->tln_nr][$value->runde] = 0;
+							else
+								$array_PlayerBuchOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkte[$value->tln_nr];
+						else
+							$array_PlayerBuchOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkte[$value->tln_nr];
+					} else {
+						$query = "SELECT tln_nr, heim, gegner, dg, runde, ergebnis FROM `#__clm_turniere_rnd_spl`"
+							. " WHERE turnier = ".$this->turnierid
+							. " AND tln_nr = ".$value->tln_nr
+							. " AND ergebnis IS NOT NULL"
+							. " ORDER BY dg ASC, runde ASC"
+						;
+						$this->_db->setQuery( $query );
+						$matchDataSnr = $this->_db->loadObjectList();
+						$PlayerPunkteKOR = 0;
+						foreach ($matchDataSnr as $key => $valuesnr) {
+							if ($maxround < ((($valuesnr->dg - 1) * $runden) + $valuesnr->runde)) continue;  // Ignorieren von bereits gesetzten kampflos oder spielfrei in Folgerunden
+							if (($valuesnr->dg < $value->dg) OR ($valuesnr->dg == $value->dg AND $valuesnr->runde < $value->runde)) {
+								if ($valuesnr->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
+								if ($valuesnr->heim == 1) $vremis = $remis; else $vremis = $remiss;
+								if ($valuesnr->ergebnis == 1) $PlayerPunkteKOR += $vsieg; // Sieg
+								elseif ($valuesnr->ergebnis == 2 OR $valuesnr->ergebnis == 10 OR $valuesnr->ergebnis == 12) $PlayerPunkteKOR += $vremis; // remis
+								elseif ($valuesnr->ergebnis == 5 OR $valuesnr->ergebnis == 11) $PlayerPunkteKOR += $vsieg; // Sieg kampflos
+							}
+						}	
+						if ($value->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
+						if ($value->heim == 1) $vremis = $remis; else $vremis = $remiss;
+						if ($value->ergebnis == 4 OR $value->ergebnis == 8) { $PlayerPunkteKOR += $vsieg; }// Gegner gewinnt kampflos oder spielfrei
+						if ($value->ergebnis == 12) { $PlayerPunkteKOR += $vremis; }// Gegner spielt kampflos remis                                                                                 neu
+						if ($value->ergebnis == 3 OR $value->ergebnis == 6 OR $value->ergebnis == 13) { $PlayerPunkteKOR += $vsieg; }// Gegner verliert auch kampflos, ist aber egal
+						//$PlayerPunkteKOR += 0.5 * (($runden * $dg) - (($value->dg - 1) * $runden) - $value->runde);
+						$PlayerPunkteKOR += ($vremis * (($maxround) - (($value->dg - 1) * $runden) - $value->runde));
+						$array_PlayerBuchOpp[$value->tln_nr][] = $PlayerPunkteKOR; // Array mit Gegnerwerten - für Streichresultat
+					}
 				}
 			}
-			
+   
 			// Sonneborn-Berger
 			if (in_array(3, $arrayFW) OR in_array(13, $arrayFW)) { // SoBe als ein TieBreaker gewünscht?
 				if ($value->ergebnis == 0 OR $value->ergebnis == 9) {
-					$array_PlayerSoBeOpp[$value->tln_nr][] = 0; 	// Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = 0; 	// Array mit Gegnerwerten - für Streichresultat
 				} elseif ($value->ergebnis == 1) {
-					$array_PlayerSoBeOpp[$value->tln_nr][] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
 				} elseif ($value->ergebnis == 2 OR $value->ergebnis == 10) {
-					$array_PlayerSoBeOpp[$value->tln_nr][] = (.5 * $array_PlayerPunkteTB[$value->gegner]); // Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = (.5 * $array_PlayerPunkteTB[$value->gegner]); // Array mit Gegnerwerten - für Streichresultat
 				} elseif ($value->ergebnis == 12 AND $paramTBFideCorrect == 0) {
-					$array_PlayerSoBeOpp[$value->tln_nr][] = (.5 * $array_PlayerPunkteTB[$value->gegner]); // Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = (.5 * $array_PlayerPunkteTB[$value->gegner]); // Array mit Gegnerwerten - für Streichresultat
 				} elseif ($value->ergebnis == 5 AND $paramTBFideCorrect == 0) {
-					$array_PlayerSoBeOpp[$value->tln_nr][] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
 				} elseif ($value->ergebnis == 11 AND $paramTBFideCorrect == 0) {
-					$array_PlayerSoBeOpp[$value->tln_nr][] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
 				} elseif ($paramTBFideCorrect == 0) {
-					$array_PlayerSoBeOpp[$value->tln_nr][] = 0; 		// Array mit Gegnerwerten - für Streichresultat
+					$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = 0; 		// Array mit Gegnerwerten - für Streichresultat
 				} else { //Ranglistenkorrektur nach FIDE (Teil 2)
-					$query = "SELECT tln_nr, heim, gegner, dg, runde, ergebnis FROM `#__clm_turniere_rnd_spl`"
-					. " WHERE turnier = ".$this->turnierid
-					. " AND tln_nr = ".$value->tln_nr
-					. " AND ergebnis IS NOT NULL"
-					. " ORDER BY dg ASC, runde ASC"
-					;
-					$this->_db->setQuery( $query );
-					$matchDataSnr = $this->_db->loadObjectList();
-					$PlayerPunkteKOR = 0;
-					foreach ($matchDataSnr as $key => $valuesnr) {
-						if ($maxround < ((($valuesnr->dg - 1) * $runden) + $valuesnr->runde)) continue;  // Ignorieren von bereits gesetzten kampflos oder spielfrei in Folgerunden
-						if ($valuesnr->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
-						if ($valuesnr->heim == 1) $vremis = $remis; else $vremis = $remiss;
-						if (($valuesnr->dg < $value->dg) OR ($valuesnr->dg == $value->dg AND $valuesnr->runde < $value->runde)) {
-							if ($valuesnr->ergebnis == 1) $PlayerPunkteKOR += $vsieg; // Sieg
-							elseif ($valuesnr->ergebnis == 2 OR $valuesnr->ergebnis == 12) $PlayerPunkteKOR += $vremis; // remis
-							elseif ($valuesnr->ergebnis == 5 OR $valuesnr->ergebnis == 11) $PlayerPunkteKOR += $vsieg; // Sieg kampflos
+					if ($dateEnd > $enddate_vg) {
+					  if ($value->ergebnis == 5) {
+						if ($value->gegner == 0)
+							$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkte[$value->tln_nr];
+						else
+							$array_PlayerSoBeOpp[$value->tln_nr][$value->runde] = $array_PlayerPunkteTB[$value->gegner]; // Array mit Gegnerwerten - für Streichresultat
+					  }
+					} else {
+						$query = "SELECT tln_nr, heim, gegner, dg, runde, ergebnis FROM `#__clm_turniere_rnd_spl`"
+							. " WHERE turnier = ".$this->turnierid
+							. " AND tln_nr = ".$value->tln_nr
+							. " AND ergebnis IS NOT NULL"
+							. " ORDER BY dg ASC, runde ASC"
+						;
+						$this->_db->setQuery( $query );
+						$matchDataSnr = $this->_db->loadObjectList();
+						$PlayerPunkteKOR = 0;
+						foreach ($matchDataSnr as $key => $valuesnr) {
+							if ($maxround < ((($valuesnr->dg - 1) * $runden) + $valuesnr->runde)) continue;  // Ignorieren von bereits gesetzten kampflos oder spielfrei in Folgerunden
+							if ($valuesnr->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
+							if ($valuesnr->heim == 1) $vremis = $remis; else $vremis = $remiss;
+							if (($valuesnr->dg < $value->dg) OR ($valuesnr->dg == $value->dg AND $valuesnr->runde < $value->runde)) {
+								if ($valuesnr->ergebnis == 1) $PlayerPunkteKOR += $vsieg; // Sieg
+								elseif ($valuesnr->ergebnis == 2 OR $valuesnr->ergebnis == 12) $PlayerPunkteKOR += $vremis; // remis
+								elseif ($valuesnr->ergebnis == 5 OR $valuesnr->ergebnis == 11) $PlayerPunkteKOR += $vsieg; // Sieg kampflos
+							}
 						}
+						if ($value->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
+						if ($value->heim == 1) $vremis = $remis; else $vremis = $remiss;
+						if (($value->ergebnis == 5 OR $value->ergebnis == 11)) { $PlayerFaktorKOR = $vsieg; }	// Spieler gewinnt kampflos 
+						elseif (($value->ergebnis == 12)) { $PlayerPunkteKOR += $vremis; $PlayerFaktorKOR = $vremis; }	// Spieler remis kampflos (bye)
+						else { $PlayerFaktorKOR = 0; }
+						$PlayerPunkteKOR += ($vremis * (($maxround) - (($value->dg - 1) * $runden) - $value->runde));
+						//echo "<br>p: $value->tln_nr  PlayerPunkteKOR: "; var_dump($PlayerPunkteKOR); 
+						$array_PlayerSoBeOpp[$value->tln_nr][] = ($PlayerFaktorKOR * $PlayerPunkteKOR); // Array mit Gegnerwerten - für Streichresultat
 					}
-					if ($value->heim == 1) $vsieg = $sieg; else $vsieg = $siegs;
-					if ($value->heim == 1) $vremis = $remis; else $vremis = $remiss;
-					if (($value->ergebnis == 5 OR $value->ergebnis == 11)) { $PlayerFaktorKOR = $vsieg; }	// Spieler gewinnt kampflos 
-					elseif (($value->ergebnis == 12)) { $PlayerPunkteKOR += $vremis; $PlayerFaktorKOR = $vremis; }	// Spieler remis kampflos (bye)
-					else { $PlayerFaktorKOR = 0; }
-					$PlayerPunkteKOR += ($vremis * (($maxround) - (($value->dg - 1) * $runden) - $value->runde));
-					//echo "<br>p: $value->tln_nr  PlayerPunkteKOR: "; var_dump($PlayerPunkteKOR); 
-					$array_PlayerSoBeOpp[$value->tln_nr][] = ($PlayerFaktorKOR * $PlayerPunkteKOR); // Array mit Gegnerwerten - für Streichresultat
 				}
 				//echo "<br>p: $value->tln_nr  array_PlayerSoBeOpp: "; var_dump($array_PlayerSoBeOpp[$value->tln_nr]); 				
 			}
@@ -493,7 +547,7 @@ class CLMTournament extends stdClass {
 		if (in_array(3, $arrayFW)) { // normale Sonneborn-Berger als TieBreaker gewünscht?
 			for ($s=1; $s<= $this->data->teil; $s++) { // alle Startnummern durchgehen
 				if (!isset($array_PlayerSoBeOpp[$s])) $array_PlayerSoBe[$s] = 0;
-				elseif (count($array_PlayerSoBeOpp[$s]) == 1) $array_PlayerSoBe[$s] = $array_PlayerSoBeOpp[$s][0];
+				elseif (count($array_PlayerSoBeOpp[$s]) == 1) $array_PlayerSoBe[$s] = array_sum($array_PlayerSoBeOpp[$s]);
 				else $array_PlayerSoBe[$s] = array_sum($array_PlayerSoBeOpp[$s]);
 			}
 		} elseif (in_array(13, $arrayFW)) { // Sonneborn-Berger mit Streichresultat
@@ -514,7 +568,7 @@ class CLMTournament extends stdClass {
 		if ((in_array(1, $arrayFW)) OR (in_array(2, $arrayFW)) OR (in_array(11, $arrayFW)) OR (in_array(12, $arrayFW))) { // normale Buchholz als TieBreaker gewünscht?
 			for ($s=0; $s<= $this->data->teil; $s++) { // alle Startnummern durchgehen
 				if (!isset($array_PlayerBuchOpp[$s])) $array_PlayerBuch[$s] = 0;
-				elseif (count($array_PlayerBuchOpp[$s]) == 1) $array_PlayerBuch[$s] = $array_PlayerBuchOpp[$s][0];
+				elseif (count($array_PlayerBuchOpp[$s]) == 1) $array_PlayerBuch[$s] = array_sum($array_PlayerBuchOpp[$s]);
 				else $array_PlayerBuch[$s] = array_sum($array_PlayerBuchOpp[$s]);
 			}
 		} 
@@ -526,7 +580,8 @@ class CLMTournament extends stdClass {
 				elseif (count($array_PlayerBuchOpp[$s]) == 0) 
 					$array_PlayerBuch1St[$s] = 0;
 				elseif (count($array_PlayerBuchOpp[$s]) == 1) 
-					$array_PlayerBuch1St[$s] = $array_PlayerBuchOpp[$s][0];
+//					$array_PlayerBuch1St[$s] = $array_PlayerBuchOpp[$s][0];
+					$array_PlayerBuch1St[$s] = array_sum($array_PlayerBuchOpp[$s]);
 				elseif (count($array_PlayerBuchOpp[$s]) > 2) //== ($dg * $runden)) 
 					$array_PlayerBuch1St[$s] = array_sum($array_PlayerBuchOpp[$s]) - min($array_PlayerBuchOpp[$s]);
 				else $array_PlayerBuch1St[$s] = array_sum($array_PlayerBuchOpp[$s]);
@@ -553,14 +608,23 @@ class CLMTournament extends stdClass {
 		if ((in_array(2, $arrayFW)) OR (in_array(12, $arrayFW))) { // Buchholz-Summe als TieBreaker gewünscht?
 			// erneut alle Matches durchgehen -> Spieler erhalten Buchholzsummen
 			foreach ($matchData as $key => $value) {
-				if ($value->gegner >= 1) {
+				if ($value->gegner >= 1 AND $value->ergebnis < 3) {
 					$array_PlayerBuSum[$value->tln_nr] += $array_PlayerBuch[$value->gegner];
 					if ($array_PlayerBuSumMin[$value->tln_nr] > $array_PlayerBuch[$value->gegner]) 
 							$array_PlayerBuSumMin[$value->tln_nr] = $array_PlayerBuch[$value->gegner];
 				} else $array_PlayerBuSumMin[$value->tln_nr] = 0;
 			}
 		}
-		// BuchholzSumme mit Streichresultat
+		// BuchholzSumme mit 1 Streichwertung
+		if ((in_array(12, $arrayFW)) OR (in_array(12, $arrayFW))) { // Buchholz-Summe - 1 als TieBreaker gewünscht?
+			// erneut alle Matches durchgehen -> Spieler erhalten Buchholzsummen - 1
+			foreach ($matchData as $key => $value) {
+				if ($value->gegner >= 1 AND $value->ergebnis < 3) {   // nur gespielte Ergebnisse
+					$array_PlayerBuSum1St[$value->tln_nr] += $array_PlayerBuch1St[$value->gegner];
+				}
+			}
+		}
+/*		// BuchholzSumme mit Streichresultat - alt
 		if (in_array(12, $arrayFW)) { // als TieBreaker gewünscht?
 			$array_s12 = array();
 			foreach ($matchData as $key => $value) {
@@ -578,7 +642,7 @@ class CLMTournament extends stdClass {
 					$array_PlayerBuSum1St[$s] = $array_PlayerBuSum1St[$s] - $array_PlayerBuSum1StMin[$s];
 			}
 		}
-	
+*/	
 		// Elo-Schnitt
 		if (in_array(6, $arrayFW)) { // Elo-Schnitt als TieBreaker gewünscht?
 			for ($s=1; $s<= $this->data->teil; $s++) { // alle Startnummern durchgehen
@@ -753,6 +817,9 @@ class CLMTournament extends stdClass {
 					case 51: // ordering
 						$sumTiebr[$tb] = 1000 - $player[$s-1]->ordering;
 						break;
+					case 52: // eigene TWZ
+						$sumTiebr[$tb] = $player[$s-1]->twz;
+						break;
 					default:
 						$sumTiebr[$tb] = 0;
 				}
@@ -846,12 +913,14 @@ class CLMTournament extends stdClass {
 	function setRankingPositions() {
 	
 		if($this->turnierid==""){ return; }
+		if ($this->data->tiebr1 == 52) $sort1 = 'ASC'; else $sort1 = 'DESC';
+		if ($this->data->tiebr2 == 52) $sort2 = 'ASC'; else $sort2 = 'DESC';
+		if ($this->data->tiebr3 == 52) $sort3 = 'ASC'; else $sort3 = 'DESC';
 		$query = "SELECT * "
 			." FROM `#__clm_turniere_tlnr`"
 			." WHERE turnier = ".$this->turnierid
-			." ORDER BY sum_punkte DESC, sumTiebr1 DESC, sumTiebr2 DESC, sumTiebr3 DESC, snr ASC"
+			." ORDER BY sum_punkte DESC, sumTiebr1 ".$sort1.", sumTiebr2 ".$sort2.", sumTiebr3 ".$sort3.", snr ASC"
 			;
-		
 		$this->_db->setQuery( $query );
 		$players = $this->_db->loadObjectList();
 	

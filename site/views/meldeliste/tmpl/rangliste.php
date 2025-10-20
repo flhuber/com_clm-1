@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2024 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -18,7 +18,6 @@ $document->addStyleSheet( $cssDir.DS.'clm_content.css', 'text/css', null, array(
 // Variablen holen
 $sid = clm_core::$load->request_int('saison', '1' );
 $zps = clm_core::$load->request_string('zps','1');
-$man = clm_core::$load->request_int('man' );
 $gid	= clm_core::$load->request_int('gid');
 
 // Login Status prüfen
@@ -50,9 +49,24 @@ if ($clmuser[0]->zps <> $zps) {
 	$mainframe->enqueueMessage( $msg );
 	$mainframe->redirect( $link );
 				}
-
+// Prüfen ob Pflege im FE noch zulässig ist
+$ligen 		= $this->ligen;
+$a_ligen = array();
+$today = date("Y-m-d");
+foreach ($ligen as $lig01) {
+	// Ligaparameter bereitstellen
+ 	$params = new clm_class_params($lig01->params);
+	$deadline_roster = $params->get('deadline_roster','1970-01-01');
+	if ($deadline_roster >= $today) {
+		$a_ligen[] = $lig01->lid;
+	}
+}
+if (count($a_ligen) < 1) {
+	$msg = JText::_( '<h2>Sie können diese Rangfolge nicht (mehr) pflegen. Wenden Sie sich an einen Staffelleiter.</h2>' );
+	$mainframe->enqueueMessage( $msg );
+	$mainframe->redirect( $link );
+				}
 // Prüfen ob Datensatz schon vorhanden ist
-
 $abgabe	= $this->abgabe;
 
 //if (isset($abgabe[0]->id) AND $abgabe[0]->id != "") {
@@ -153,6 +167,10 @@ function Spielerschreiben(i)
     <?php } ?>
     document.getElementById('Status'+i).innerHTML=Spieler[i][8];
     document.getElementById('check'+i).checked=Spieler[i][9];
+    if (Spieler[i][9] == 1) 
+		document.getElementById('check'+i).style["display"]="none";
+    else 
+		document.getElementById('check'+i).style["display"]="";
 }
 function QSort(l,r,Tiefe)
  {
@@ -391,7 +409,9 @@ Liste absenden !
 
 <br><br>
 
-<form action="index.php?option=com_clm&amp;view=meldeliste&amp;layout=sent_rangliste&amp;saison=<?php echo $sid ?>&amp;gid=<?php echo $gid ?>&amp;zps=<?php echo $zps ?>&amp;count=<?php echo count($spieler) ?>" method="post" name="adminForm">
+<!-- <form action="index.php?option=com_clm&amp;view=meldeliste&amp;layout=sent_rangliste&amp;saison=<?php echo $sid ?>&amp;gid=<?php echo $gid ?>&amp;zps=<?php echo $zps ?>&amp;count=<?php echo count($spieler) ?>" method="post" name="adminForm" id="adminForm">
+--> 
+<form action="<?php echo JRoute::_('index.php'); ?>" method="post" name="adminForm" id="adminForm">
 
 <style type="text/css">table { width:60%; }</style>
 
@@ -420,6 +440,7 @@ Liste absenden !
 	<input type="hidden" name="PKZ<?php echo $x; ?>" value="<?php echo $spieler[$x]->PKZ; ?>" />
 	<input type="hidden" name="ZPSM<?php echo $x; ?>" value="<?php echo $spieler[$x]->ZPS; ?>" />
 	<input type="hidden" name="MGL<?php echo $x; ?>" value="<?php echo $spieler[$x]->Mgl_Nr; ?>" />
+	<input type="hidden" name="BLOCK_A<?php echo $x; ?>" value="<?php echo $spieler[$x]->gesperrt; ?>" />
 
 	<tr>
 	<td class="key" nowrap="nowrap">
@@ -429,7 +450,8 @@ Liste absenden !
 	<input type="text" name="RA<?php echo $x ?>" size="5" maxLength="5" value="<?php if(isset($spieler[$x]->Rang)) { echo $spieler[$x]->Rang; } ?>" onChange="Rcheck(this)">
 	</td>
 	<td id="SP<?php echo $x; ?>" name="SP<?php echo $x; ?>" class="key" nowrap="nowrap">
-		<?php echo $spieler[$x]->Spielername; ?></td>
+		<?php if ($spieler[$x]->gesperrt !="1") echo $spieler[$x]->Spielername; 
+			else echo '<del>'.$spieler[$x]->Spielername.'</del>'; ?></td>
 	<td id="ZPSM<?php echo $x; ?>" class="key" nowrap="nowrap">
 		<?php echo $spieler[$x]->ZPS; ?></td>
 	<td id="MGL<?php echo $x; ?>" class="key" nowrap="nowrap">
@@ -443,7 +465,7 @@ Liste absenden !
 	<td id="DWI<?php echo $x; ?>" class="key" nowrap="nowrap">
 		<?php echo $spieler[$x]->DWZ_Index; ?></td>
 	<td align="center">
-		<input type="checkbox" name="check<?php echo $x; ?>" id="check<?php echo $x; ?>" value="1" <?php if ($spieler[$x]->gesperrt =="1") { echo 'checked="checked"'; }?>>
+		<input type="checkbox" name="check<?php echo $x; ?>" id="check<?php echo $x; ?>" value="1" <?php if ($spieler[$x]->gesperrt =="1") { echo 'checked="checked" style="display:none;"'; } ?>>
 	</td>
 	</tr>
 
@@ -463,9 +485,10 @@ Liste absenden !
   </fieldset>
   </div>
 		<div class="clr"></div>
-		<input type="hidden" name="section" value="ranglisten" />
+<!--		<input type="hidden" name="section" value="ranglisten" /> 
+-->		<input type="hidden" name="view" value="meldeliste" />
 		<input type="hidden" name="option" value="com_clm" />
-
+		<input type="hidden" name="layout" value="sent_rangliste" />
 		<input type="hidden" name="count" value="<?php echo count($spieler); ?>" />
 		<input type="hidden" name="zps" value="<?php echo $spieler[0]->ZPS; ?>" />
 		<input type="hidden" name="saison" value="<?php echo $spieler[0]->sid; ?>" />
@@ -482,4 +505,4 @@ Liste absenden !
 </center>
 
 <br>
-<div style=" text-align:right; padding-right:1%"><label for="name" class="hasTip" title="<?php echo JText::_('Das Chess League Manager (CLM) Projekt ist freie, kostenlose Software unter der GNU / GPL. Besuchen Sie unsere Projektseite www.chessleaguemanager.de für die neueste Version, Dokumentationen und Fragen. Wenn Sie an der Entwicklung des CLM teilnehmen wollen melden Sie sich bei uns per E-mail. Wir sind für jede Hilfe dankbar !'); ?>">Sie wollen am Projekt teilnehmen oder haben Verbesserungsvorschläge - <a href="http://www.chessleaguemanager.de">CLM Projektseite</a></label></div>
+<div style=" text-align:right; padding-right:1%"><label for="name" class="hasTip" title="<?php echo JText::_('Das Chess League Manager (CLM) Projekt ist freie, kostenlose Software unter der GNU / GPL. Besuchen Sie unsere Projektseite chessleaguemanager.org für die neueste Version, Dokumentationen und Fragen. Wenn Sie an der Entwicklung des CLM teilnehmen wollen melden Sie sich bei uns per E-mail. Wir sind für jede Hilfe dankbar !'); ?>">Sie wollen am Projekt teilnehmen oder haben Verbesserungsvorschläge - <a href="http://chessleaguemanager.de">CLM Projektseite</a></label></div>

@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2023 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link https://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -159,7 +159,7 @@ else {  ?>
             </tr>
             <tr>
             <td class="det_col1"><?php if ($spieler[0]->FIDE_ELO > 0) { ?><?php echo JText::_('PLAYER_ELO') ?><?php } ?></td>
-            <td class="det_col2"><a href="http://ratings.fide.com/card.phtml?event=<?php echo $spieler[0]->FIDE_ID;?>" target="_blank"><?php if ($spieler[0]->FIDE_ELO > 0) { ?><?php echo $spieler[0]->FIDE_ELO; ?><?php } ?></a></td>
+			<td class="det_col2"><a href="https://ratings.fide.com/profile/<?php echo $spieler[0]->FIDE_ID;?>" target="_blank"><?php if ($spieler[0]->FIDE_ELO > 0) { ?><?php echo $spieler[0]->FIDE_ELO; ?><?php } ?></a></td>
         	</tr>
         </table>
     </td>
@@ -320,7 +320,9 @@ else { $sum_ea = 0; $sum_punkte = 0; $sum_partien = 0; $ex = 0; ?>
 
 <?php //if($dwz =="0") {
 // Einzelauswertung der Ligen
+	$v_liga = 0;
 	foreach ($spieler as $spielerl) {
+	if ($v_liga == $spielerl->liga) continue; else $v_liga = $spielerl->liga;
 	if ($spielerl->Punkte == 0 AND $spielerl->Partien == 0) {
 	echo CLMContent::clmWarning($spielerl->liga_name . '-' . JText::_('PLAYER_NO_EVAL_GAMES')).'<br>';
 	} else { ?>

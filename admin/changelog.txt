@@ -12,7 +12,91 @@ $ -> Language fix or change
 - -> Removed
 ! -> Note
 
-- - - - - 4.2.2 - [xx-xx-2024] - - - - - - - - - - - - - - - - - - - -
+- - - - - 4.3.1 - [xx-xx-2025] - - - - - - - - - - - - - - - - - - - -
+^ Umstellung der Links von chessleaguemanager.de auf chessleaguemanager.org
++ Einzelturniere: Feinwertung niedrige eigene TWZ
++ Teamwettbewerbe: freie Mail an alle MF einer Staffel
++ Anzeige Schiedsrichter in Paarungsliste
+# Teamwettbewerbe: Anzeige Inoffizielle Elo-Auswertung
+# Benutzer-Mail-Adressen mit Umlaut nun möglich 
+# SWM-Import: Umschlüsselung von Feinwertungen
+# TRF-Import: Elo-Zahl aus Spielerkarte
+# Anzeige-Plugin: Datenbereitstellung bei gleicher Platzierung
+# Frontend Views: FIDE-Links neu angepasst
+# Anzeige: pdf-Darstellung großer Kreuztabellen nachgebessert
+# Rangliste im Rundenbericht: störende Warnung bei Sonderfall entfernt
+
+- - - - - 4.3.0 - [05-09-2025] - - - - - - - - - - - - - - - - - - - -
++ Views Rangliste, Tabelle, Rundenbericht: Reset nach Zeitintervall
+# Teamwettbewerbe: Berliner Wertung bei kampflos 
++ Teamwettbewerbe: Termine kopieren
+# Admin-View DeWIS: Zugriffsberechtigung korrigiert
+# Teamwettbewerbe: Runden anlegen für Wettbewerbe mit 1 Runde z.B. Relegation
+# Vereinliste: im Ausnahmefall fehlt Zwischenzeile für Schachbezirk
+# Einzelturniere: Feinwertungen bei spielfrei während des Turniers, Buchholzsumme bei kampflos
+^ Anpassung php 8.2 (DateTime::createFromFormat)
+# Teamwettbewerbe: Anzeigelänge Liganame bis 100 Zeichen
+# Benutzer: geblockte Jommla-User ausschliessen
+# TRF-Import: Bereitstellung Rundenanzahl  
+# SWT-Import Einzelturniere: Behandlung Rundentermine
+^ Logging: Darstellung umfangreicher Einträge über Popup
++ Teamwettbewerbe: Kopieren von Meldelisten
+# Ligakarte/Turnierinfo: kleine Designkorrektur
++ Inoffizielle Elo-Auswertung pro Wettbewerb aktivierbar
+# Anpassungen J 5.3 / php 8.3
+^ Mail-Ausgabe: Aufbereitung der subject-Zeile 
+# Teamwettbewerbe: Einbau Checkin nach Update bei Liga-, Benutzer- und Mannschaftsdaten
+# Vereinsliste: Nachbesserung Sortierung
++ Mail-Ausgabe: auch auf UNIX-Systemen ohne sendmail
+^ Spielgemeinschaften: Anzahl Partnervereine ohne Trägerverein: neuer Standard 0 (keine Spielgemeinschaft)   
+
+- - - - - 4.2.4 - [16-05-2025] - - - - - - - - - - - - - - - - - - - -
++ Ergebniseingabe durch SL im Frontend freischaltbar
+^ Datenbank: formale Umstellung der DB-Engine auf InnoDB
+^ Vereinheitlichung der Mailausgaben mit Möglichkeit der Unterdrückung (Ergebnismeldung)
+^ Ergebnismeldung: Mailversand an funktionale Mailadressen bei Entkopplung
++ Benutzer: optional zusätzlich Fide-Id 
+# Datenbank: Korrektur Anzeige Ergebnis 0-0
+^ Einzelturnier Paarungsliste: Rundenkommentar ergänzt
+^ Datenbank: Anpassung der Schiedsrichtertabellen
++ Schiedsrichter: Anlegen und Datenpflege für Schiedsrichter möglich
++ Schiedsrichter: Zuordnung von Schiedsrichtern zu Team- und Einzelwettbewerben 
++ Schiedsrichter: Anzeigen der Schiedsrichter im Frontend
++ Ergebniseingabe durch SR im Frontend freischaltbar
++ Benutzer: vorgefertigte Bestätigungsmail
+# SWT-Import: Anpassung wegen sql_mode=strict_trans_tables 
+^ Einzelturnier: Löschen Teilnehmer vor Turnierstart
+# Einzelturnier: Abspeichern FIDE-Id bei Teilnehmer
+# View Spieler: in Aufstellung von 2 Teams eines Vereins in einer Liga
+
+- - - - - 4.2.3 - [18-02-2025] - - - - - - - - - - - - - - - - - - - -
+# Rundenbericht: In Rangliste punkt- und wertungsgleich -> gleiche Platzierung (Nachbesserung)
+# Rundenbericht: Darstellung bei mehr als einer Mannschaft spielfrei
+# SWT-Import Einzel: Übernahme 50%-Schalter, Korrektur TWZ-Schalter
+^ Vereinheitlichung der Mailausgaben mit Möglichkeit der Unterdrückung (Teil 2)
+# Rangfolgepflege im FE: Verbesserung der Berechtigungsprüfung
+# Admin-View Mannschaft: Erhalt der Ranglistenposition
+# Teamwettbewerbe: Berechtigungsproblem für Staffelleiter
+^ Benutzer / Kontaktdaten: bei Änderung der CLM-Mailadresse Anpassung oder keine Anpassung der Joomla-Mailadresse über Schalter
++ TRF-Export Einzel: hinzugefügt
++ Schiedsrichter-Tabellen: hinzugefügt
+# Admin View Mitgliederverwaltung: Entsperren Verein bei Abbruch
+^ BE: Spielleiter dürfen Daten der Vereinsmitglieder pflegen
+^ Team- u. Einzelwettbewerbe: Modifikation Runden löschen / Runden anlegen
+# Einstellungen: Korrektur von Texten
+^ Ergebnismeldung: Schaltfläche Löschen wird zu Ergebnis löschen
+^ Copyright 2008-2025
+# Einzelturniere: Feinwertung Buchholzsumme mit Streichwertung korrigiert
+# SWT-Import Einzel: Übernahme von Turnierdetails erweitert
+# TRF-Import: Bye-Ergebnisse ergänzt
+# Einzelturniere: Anzeige von ausgelosten noch nicht gespielten Paarungen in Rangliste 
++ Einzelturniere: TWZ-Ermittlung erweitert
+# Ergebnismeldung: Nachbesserung Fehlermeldung bei spielfrei-Paarungen
+# View Mannschaft: Anzahl sichtbare Spieler erhöht
+# SWM-Import: Import unvollständiger Turniere, Paarungen noch ohne Ergebnis
+^ Admin-View Datenbank: Anpassung Link zu DSB-Dateien
+
+- - - - - 4.2.2 - [20-11-2024] - - - - - - - - - - - - - - - - - - - -
 # Frontend-Views: Nachladen von jquery 1.4.2 ersetzt durch internes jquery 3.7.1 (TabellenHeader) 
 # Einzelturniere: Abbruch bei Eingabe von Bye-Ergebnisse
 # Ligen- und Turnier-Manager BE: Änderung der Liga- bzw. Turnier-Details bei Funktionen  
@@ -23,8 +107,17 @@ $ -> Language fix or change
 ^ DeWIS-Datei: Geburtstag anstelle Geburtsjahr vorrangig verwenden, wenn gegeben
 # Online-Turnieranmeldung: Bestätigung unter J 5.x
 ^ Update Leaflet Version
-^ SWT-Import Liga: Erhaltung er Kategorien bei Update
-^ Vereinheitlichung der Mailausgaben mit Möglichkeit der Unterdrückung
+^ SWT-Import Liga: Erhaltung der Kategorien bei Update
+^ Vereinheitlichung der Mailausgaben mit Möglichkeit der Unterdrückung (Teil 1)
++ SWT-Import Einzel: Import von SwissChess-Version 7.24
+# Geo-Daten: Verfeinerung über PLZ
++ Synchronisation Sperrkennzeichen in Backend und Frontend
++ Ligaheft: Ergänzung um praktische Infos
+# Rundenbericht: In Rangliste punkt- und wertungsgleich -> gleiche Platzierung
+# Einzelturniere: Änderung der Teilnehmerdaten vor Turnierstart
+# Einzelturniere: Berechtigung Turnier anlegen
++ Einzelturniere: Erweiterung der Feinwertungsroutine entspr. FIDE gültig ab 01.08.24 
+# Rundenbericht: Attributsfeld bei Rangfolgesystem
 
 - - - - - 4.2.1 - [21-08-2024] - - - - - - - - - - - - - - - - - - - -
 + Datenbank: Import auch von Spielerdaten im V2-Format mit Spieler-Id
@@ -43,6 +136,7 @@ $ -> Language fix or change
 + BE/FE: Caching für Geo-Locationing eingebaut (Mannschaft, Verein, Meldeliste)
 ^ pgn-Import: Saisonauswahhl möglich
 # Admin View Runden: Berechtigungen TL Mannschaftsturniere
+
 - - - - - 4.2.0 - [17-06-2024] - - - - - - - - - - - - - - - - - - - -
 - - - - - 4.1.6 - [08-06-2024] - - - - - - - - - - - - - - - - - - - -
 ^ Paarungsliste: iCal-Ausgabe Anpassung wegen sql_mode=only_full_group_by

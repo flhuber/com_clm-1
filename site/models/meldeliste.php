@@ -77,7 +77,7 @@ class CLMModelMeldeliste extends JModelLegacy
 		." FROM #__clm_rangliste_id"
 		." WHERE gid =".$gid
 		." AND sid = ".$sid
-		." AND zps = ".$zps
+		." AND zps = '$zps' "
 		;
 	$db->setQuery($sql);
 	$rid	= $db->loadObjectList();
@@ -307,9 +307,11 @@ class CLMModelMeldeliste extends JModelLegacy
 	$liga = $team[0]->liga;
 
 	if ($countryversion =="de") {
-		$query = "SELECT a.Spielername as name, CONCAT(a.zps,a.Mgl_Nr) as id, a.zps, a.Mgl_Nr, a.PKZ, a.DWZ as dwz, a.DWZ_Index as dwz_I0, IFNULL(l.snr,999) as snr "; 
+		$query = "SELECT a.Spielername as name, CONCAT(a.zps,a.Mgl_Nr) as id, a.zps, a.Mgl_Nr, a.PKZ"
+				.", a.DWZ as dwz, a.DWZ_Index as dwz_I0, IFNULL(l.snr,999) as snr, a.gesperrt "; 
 	} else {
-		$query = "SELECT a.Spielername as name, CONCAT(a.zps,a.PKZ) as id, a.zps, a.Mgl_Nr, a.PKZ, a.DWZ as dwz, a.DWZ_Index as dwz_I0, IFNULL(l.snr,999) as snr "; 
+		$query = "SELECT a.Spielername as name, CONCAT(a.zps,a.PKZ) as id, a.zps, a.Mgl_Nr, a.PKZ"
+				.", a.DWZ as dwz, a.DWZ_Index as dwz_I0, IFNULL(l.snr,999) as snr, a.gesperrt "; 
 	}
 	$query .= " ,v.Vereinname "
 		." FROM #__clm_dwz_spieler as a "
@@ -370,6 +372,32 @@ class CLMModelMeldeliste extends JModelLegacy
 	function getCLMML ( $options=array() )
 	{
 		$query	= $this->_getCLMML( $options );
+		$result = $this->_getList( $query );
+
+		return @$result;
+	}
+
+	// Ligen zur Rangfolgegruppe
+	function _getCLMLigen ( &$options )
+	{
+	$sid	= clm_core::$load->request_int('saison','1');
+	$zps 	= clm_escape(clm_core::$load->request_string('zps'));
+	$layout	= clm_escape(clm_core::$load->request_string('layout'));
+	$gid	= clm_core::$load->request_int('gid');
+	$db	= JFactory::getDBO();
+	
+	$query	= "SELECT m.id, m.name, l.id as lid, l.rang, l.params as params "
+		." FROM #__clm_mannschaften as m"
+		." LEFT JOIN #__clm_liga as l ON l.id = m.liga AND l.sid = m.sid  "
+		." WHERE m.sid = $sid AND m.zps = '$zps' "
+		." AND l.rang = $gid "
+		;
+	return $query;
+	}
+
+	function getCLMLigen ( $options=array() )
+	{
+		$query	= $this->_getCLMligen( $options );
 		$result = $this->_getList( $query );
 
 		return @$result;

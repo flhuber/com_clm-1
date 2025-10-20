@@ -1,7 +1,7 @@
 <?php
 /**
  * @ Chess League Manager (CLM) Component 
- * @Copyright (C) 2008-2023 CLM Team.  All rights reserved
+ * @Copyright (C) 2008-2025 CLM Team.  All rights reserved
  * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL
  * @link http://www.chessleaguemanager.de
  * @author Thomas Schwietert
@@ -61,9 +61,10 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 			//JObject wird erzeugt und mit Turnierdaten erweitert
 			$this->_turnier = new JObject();
 			
-			//
+			//Datei-Version
+			$file_version			= CLMSWT::readInt($swt,609,2);
+
 			//Turnierdaten, die nicht aus der SWT-Datei importiert werden
-			//
 						
 			//Standartwerte
 			$this->_turnier->set('tid'				, 0);
@@ -78,7 +79,7 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 			$this->_turnier->set('bezirkTur'		, 1);
 			$this->_turnier->set('vereinZPS'		, 0);
 			$this->_turnier->set('published'		, 1);
-			$this->_turnier->set('bem_int'			, 'SWT-Importfile:'.$filename.';');
+			$this->_turnier->set('bem_int'			, 'SWT-Importfile:'.$filename.'; Swiss-Chess-Version:'.$file_version.';');
 			$this->_turnier->set('bemerkungen'		, '');
 			$this->_turnier->set('started'			, 0);
 			$this->_turnier->set('finished'			, 0);
@@ -228,7 +229,7 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 				} elseif($feinwertung2 == 5 AND $anzStreichwertungen == 1) {
 					//Sonneborn-Berger mit 1 Streichergebnis
 					$this->_turnier->set('tiebr2', 13);
-				} elseif($feinwertung1 == 6 AND $anzStreichwertungen == 0) {
+				} elseif($feinwertung2 == 6 AND $anzStreichwertungen == 0) {
 					//mittlere Buchholz 
 					$this->_turnier->set('tiebr2', 5);
 				} elseif($feinwertung2 == 8) {
@@ -254,8 +255,13 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 				}				
 			}
 			
-			//Ranglistenkorrektur
+			//Ranglistenkorrektur FIDE
 			$this->_turnier->set('optionTiebreakersFideCorrect', CLMSWT::readBool($swt,675));
+			//50%-Regel FIDE
+			if (CLMSWT::readBool($swt,605) == 1)
+				$this->_turnier->set('option50PercentRule', 0);
+			else
+				$this->_turnier->set('option50PercentRule', 1);
 			
 			//Partiewertung
 			$pwertung = CLMSWT::readInt($swt,1336,1);
@@ -298,6 +304,12 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 				$this->_turnier->set('useAsTWZ',1);
 			} elseif($twz == 2){
 				$this->_turnier->set('useAsTWZ',0);
+			} elseif($twz == 3){
+				$this->_turnier->set('useAsTWZ',3);
+			} elseif($twz == 4){
+				$this->_turnier->set('useAsTWZ',4);
+			} else {
+				$this->_turnier->set('useAsTWZ',0);
 			}
 						
 		}
@@ -319,7 +331,10 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 		$values = '';
 		foreach ($spalten as $spalte) {
 			$fields .= "`".$spalte."`,";
-			$values .= " '".clm_escape(clm_core::$load->request_string($spalte,''))."',";
+			if ($spalte == 'started' OR $spalte == 'finished' OR $spalte == 'ordering') 
+				$values .= " '".clm_escape(clm_core::$load->request_string($spalte,'0'))."',";
+			else
+				$values .= " '".clm_escape(clm_core::$load->request_string($spalte,''))."',";
 		}
 		
 		// Parameter
@@ -331,7 +346,8 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 		$values .= " '".implode("\n", $paramsStringArray)." '";
 		
 		
-		$insert_query = "INSERT IGNORE INTO 
+//		$insert_query = "INSERT IGNORE INTO 
+		$insert_query = "REPLACE INTO  
 								#__clm_swt_turniere" . " 
 								( " . $fields . " ) "
 		              . " 	VALUES 
@@ -434,6 +450,9 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 		$path 		= JPATH_COMPONENT . DIRECTORY_SEPARATOR . "swt" . DIRECTORY_SEPARATOR;
 		$swt 		= $path.$filename;
 		
+		//Datei-Version
+		$file_version			= CLMSWT::readInt($swt,609,2);
+
 		//Array f�r JObjects erzeugen;
 		$this->_teilnehmer = array();
 		
@@ -441,7 +460,10 @@ class CLMModelSWTTurnierInfo extends JModelLegacy {
 		$anz_teilnehmer 		= CLMSWT::readInt($swt,7,2);
 		$anz_runden		 		= CLMSWT::readInt($swt,1,2);
 		$anz_durchgaenge 		= CLMSWT::readInt($swt,599,1);
-		$aktuelle_runde			= CLMSWT::readInt($swt,3,2);
+		if ($file_version == 724)
+			$aktuelle_runde			= $anz_runden;
+		else 
+			$aktuelle_runde			= CLMSWT::readInt($swt,3,2);
 		$aktueller_durchgang	= CLMSWT::readInt($swt,598,1);
 		$ausgeloste_runden		= CLMSWT::readInt($swt,5,2);
 		$modus = $this->_calculateCLMModus(CLMSWT::readInt($swt,596,1));
